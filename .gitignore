@@ -64,3 +64,5 @@ flatbuild
 *.snap
 5.15.2
 *.log
+openssl*
+*.exe

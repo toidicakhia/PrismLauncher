@@ -49,6 +49,34 @@ runs:
       run: |
         cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build-type }}
 
+        # Deploy Qt 5 plugins and OpenSSL for legacy (Qt 5) builds
+        if ("${{ inputs.artifact-name }}" -match "Legacy") {
+            $qt5Dir = [System.IO.Path]::GetDirectoryName($env:Qt5_DIR)
+            $qt5Prefix = [System.IO.Path]::GetDirectoryName($qt5Dir)
+            $qt5Prefix = [System.IO.Path]::GetDirectoryName($qt5Prefix)
+            $qtPlugins = Join-Path $qt5Prefix "plugins"
+            $install = Join-Path ${{ github.workspace }} ${{ env.INSTALL_DIR }}
+
+            # Copy Qt 5 plugins (release DLLs only)
+            foreach ($dir in @("iconengines", "imageformats", "platforms", "styles")) {
+                $target = Join-Path $install $dir
+                New-Item -ItemType Directory -Force -Path $target | Out-Null
+                Get-ChildItem (Join-Path $qtPlugins $dir) -Filter *.dll | Where-Object { $_.Name -notmatch 'd\.dll$' } | Copy-Item -Destination $target
+            }
+
+            # Write proper qt.conf
+            Set-Content -Path (Join-Path $install "qt.conf") -Value "[Paths]`nPlugins = plugins"
+
+            # Download and deploy OpenSSL 1.1.x DLLs
+            $opensslUrl = "https://download.firedaemon.com/FireDaemon-OpenSSL/openssl-1.1.1w.zip"
+            $opensslZip = Join-Path ${{ github.workspace }} "openssl-1.1.1w.zip"
+            $opensslDir = Join-Path ${{ github.workspace }} "openssl-1.1.1w"
+            Invoke-Webrequest $opensslUrl -OutFile $opensslZip
+            Expand-Archive -Path $opensslZip -DestinationPath $opensslDir -Force
+            Copy-Item (Join-Path $opensslDir "openssl-1.1\x64\bin\libcrypto-1_1-x64.dll") $install
+            Copy-Item (Join-Path $opensslDir "openssl-1.1\x64\bin\libssl-1_1-x64.dll") $install
+        }
+
         cd ${{ github.workspace }}
 
         Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
