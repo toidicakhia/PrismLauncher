@@ -1209,23 +1209,43 @@ if(WIN32)
     )
 endif()
 
-qt_add_resources(LAUNCHER_RESOURCES
-    resources/backgrounds/backgrounds.qrc
-    resources/multimc/multimc.qrc
-    resources/pe_dark/pe_dark.qrc
-    resources/pe_light/pe_light.qrc
-    resources/pe_colored/pe_colored.qrc
-    resources/pe_blue/pe_blue.qrc
-    resources/breeze_dark/breeze_dark.qrc
-    resources/breeze_light/breeze_light.qrc
-    resources/OSX/OSX.qrc
-    resources/iOS/iOS.qrc
-    resources/flat/flat.qrc
-    resources/flat_white/flat_white.qrc
-    resources/documents/documents.qrc
-    resources/shaders/shaders.qrc
-    "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"
-)
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_add_resources(LAUNCHER_RESOURCES
+        resources/backgrounds/backgrounds.qrc
+        resources/multimc/multimc.qrc
+        resources/pe_dark/pe_dark.qrc
+        resources/pe_light/pe_light.qrc
+        resources/pe_colored/pe_colored.qrc
+        resources/pe_blue/pe_blue.qrc
+        resources/breeze_dark/breeze_dark.qrc
+        resources/breeze_light/breeze_light.qrc
+        resources/OSX/OSX.qrc
+        resources/iOS/iOS.qrc
+        resources/flat/flat.qrc
+        resources/flat_white/flat_white.qrc
+        resources/documents/documents.qrc
+        resources/shaders/shaders.qrc
+        "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"
+    )
+else()
+    set(LAUNCHER_RESOURCES
+        resources/backgrounds/backgrounds.qrc
+        resources/multimc/multimc.qrc
+        resources/pe_dark/pe_dark.qrc
+        resources/pe_light/pe_light.qrc
+        resources/pe_colored/pe_colored.qrc
+        resources/pe_blue/pe_blue.qrc
+        resources/breeze_dark/breeze_dark.qrc
+        resources/breeze_light/breeze_light.qrc
+        resources/OSX/OSX.qrc
+        resources/iOS/iOS.qrc
+        resources/flat/flat.qrc
+        resources/flat_white/flat_white.qrc
+        resources/documents/documents.qrc
+        resources/shaders/shaders.qrc
+        "${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_LogoQRC}"
+    )
+endif()
 
 ######## Windows resource files ########
 if(WIN32)
@@ -1284,6 +1304,12 @@ endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(Launcher_logic
         gamemode
+    )
+endif()
+
+if (WIN32)
+    target_link_libraries(Launcher_logic
+        dxgi
     )
 endif()
 
@@ -1504,26 +1530,28 @@ endif()
 # Bundle utilities are used to complete packages for different platforms - they add all the libraries that would otherwise be missing on the target system.
 # NOTE: it seems that this absolutely has to be here, and nowhere else.
 if(WIN32 OR (UNIX AND APPLE))
-    if(WIN32)
-        set(QT_DEPLOY_TOOL_OPTIONS "--no-opengl-sw --no-quick-import --no-system-d3d-compiler --no-system-dxc-compiler --skip-plugin-types generic,networkinformation")
-    endif()
+    if(QT_VERSION_MAJOR EQUAL 6)
+        if(WIN32)
+            set(QT_DEPLOY_TOOL_OPTIONS "--no-opengl-sw --no-quick-import --no-system-d3d-compiler --no-system-dxc-compiler --skip-plugin-types generic,networkinformation")
+        endif()
 
-    qt_generate_deploy_script(
-        TARGET ${Launcher_Name}
-        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
-        CONTENT "
-        qt_deploy_runtime_dependencies(
-            EXECUTABLE ${BINARY_DEST_DIR}/$<TARGET_FILE_NAME:${Launcher_Name}>
-            BIN_DIR ${BINARY_DEST_DIR}
-            LIBEXEC_DIR ${LIBRARY_DEST_DIR}
-            LIB_DIR ${LIBRARY_DEST_DIR}
-            PLUGINS_DIR ${PLUGIN_DEST_DIR}
-            NO_OVERWRITE
-            NO_TRANSLATIONS
-            NO_COMPILER_RUNTIME
-            DEPLOY_TOOL_OPTIONS ${QT_DEPLOY_TOOL_OPTIONS}
-        )"
-    )
+        qt_generate_deploy_script(
+            TARGET ${Launcher_Name}
+            OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+            CONTENT "
+            qt_deploy_runtime_dependencies(
+                EXECUTABLE ${BINARY_DEST_DIR}/$<TARGET_FILE_NAME:${Launcher_Name}>
+                BIN_DIR ${BINARY_DEST_DIR}
+                LIBEXEC_DIR ${LIBRARY_DEST_DIR}
+                LIB_DIR ${LIBRARY_DEST_DIR}
+                PLUGINS_DIR ${PLUGIN_DEST_DIR}
+                NO_OVERWRITE
+                NO_TRANSLATIONS
+                NO_COMPILER_RUNTIME
+                DEPLOY_TOOL_OPTIONS ${QT_DEPLOY_TOOL_OPTIONS}
+            )"
+        )
+    endif()
 
     # Bundle our linked dependencies
     install(
@@ -1544,11 +1572,13 @@ if(WIN32 OR (UNIX AND APPLE))
         RUNTIME DESTINATION ${BINARY_DEST_DIR}
         FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR}
     )
-    # Deploy Qt plugins
-    install(
-        SCRIPT ${QT_DEPLOY_SCRIPT}
-        COMPONENT bundle
-    )
+    if(QT_VERSION_MAJOR EQUAL 6)
+        # Deploy Qt plugins
+        install(
+            SCRIPT ${QT_DEPLOY_SCRIPT}
+            COMPONENT bundle
+        )
+    endif()
     # FIXME: remove this crap once we stop using msys2
     if(MINGW)
         # i've not found a solution better than injecting the config vars like this...

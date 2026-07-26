@@ -180,7 +180,7 @@ void IconList::directoryChanged(const QString& path)
         m_icons[idx].remove(FileBased);
         if (m_icons[idx].type() == ToBeDeleted) {
             beginRemoveRows(QModelIndex(), idx, idx);
-            m_icons.remove(idx);
+            m_icons.removeAt(idx);
             reindex();
             endRemoveRows();
         } else {

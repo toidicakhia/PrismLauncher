@@ -193,17 +193,19 @@ void ResourceDownloadDialog::confirm()
     }
 
     auto selected = getTasks();
-    std::ranges::sort(selected, [](const DownloadTaskPtr& a, const DownloadTaskPtr& b) {
+    std::sort(selected.begin(), selected.end(), [](const DownloadTaskPtr& a, const DownloadTaskPtr& b) {
         return QString::compare(a->getName(), b->getName(), Qt::CaseInsensitive) < 0;
     });
     for (auto& task : selected) {
         auto extraInfo = dependencyExtraInfo.value(task->getPack()->addonId.toString());
-        confirmDialog->appendResource({ .name = task->getName(),
-                                        .filename = task->getFilename(),
-                                        .provider = ModPlatform::ProviderCapabilities::name(task->getProvider()),
-                                        .required_by = extraInfo.required_by_names,
-                                        .version_type = task->getVersion().version_type.toString(),
-                                        .enabled = !extraInfo.maybe_installed });
+        ReviewMessageBox::ResourceInformation info{};
+        info.name = task->getName();
+        info.filename = task->getFilename();
+        info.provider = ModPlatform::ProviderCapabilities::name(task->getProvider());
+        info.required_by = extraInfo.required_by_names;
+        info.version_type = task->getVersion().version_type.toString();
+        info.enabled = !extraInfo.maybe_installed;
+        confirmDialog->appendResource(std::move(info));
     }
 
     if (confirmDialog->exec() != 0) {
@@ -306,7 +308,7 @@ QList<BasePage*> ModDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
 
-    auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+    auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes{});
 
     if (ModrinthAPI::validateModLoaders(loaders)) {
         auto* page = ModrinthModPage::create(this, *m_instance);

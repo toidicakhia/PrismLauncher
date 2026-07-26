@@ -40,9 +40,9 @@ void ArchiveDownloadTask::executeTask()
     auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
     auto action = Net::Download::makeCached(m_url, entry);
     if (!m_checksum_hash.isEmpty() && !m_checksum_type.isEmpty()) {
-        auto hashType = QCryptographicHash::Algorithm::Sha1;
+        auto hashType = QCryptographicHash::Sha1;
         if (m_checksum_type == "sha256") {
-            hashType = QCryptographicHash::Algorithm::Sha256;
+            hashType = QCryptographicHash::Sha256;
         }
         action->addValidator(new Net::ChecksumValidator(hashType, QByteArray::fromHex(m_checksum_hash.toUtf8())));
     }

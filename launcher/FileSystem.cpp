@@ -104,22 +104,10 @@ namespace fs = std::filesystem;
 
 #if defined(Q_OS_WIN)
 
-#if defined(__MINGW32__)
+// These structs are in winioctl.h on Windows 8+ SDK, but hidden with _WIN32_WINNT=0x0601 (Win7 target).
+// Define them manually for all compilers when the SDK doesn't provide them.
 
-// Avoid re-defining structs retroactively added to MinGW
-// https://github.com/mingw-w64/mingw-w64/issues/90#issuecomment-2829284729
-#if __MINGW64_VERSION_MAJOR < 13
-
-struct _DUPLICATE_EXTENTS_DATA {
-    HANDLE FileHandle;
-    LARGE_INTEGER SourceFileOffset;
-    LARGE_INTEGER TargetFileOffset;
-    LARGE_INTEGER ByteCount;
-};
-
-using DUPLICATE_EXTENTS_DATA = _DUPLICATE_EXTENTS_DATA;
-using PDUPLICATE_EXTENTS_DATA = _DUPLICATE_EXTENTS_DATA*;
-#endif
+#ifndef FSCTL_GET_INTEGRITY_INFORMATION_BUFFER
 
 struct _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER {
     WORD ChecksumAlgorithm;  // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
@@ -132,6 +120,10 @@ struct _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER {
 using FSCTL_GET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER;
 using PFSCTL_GET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER*;
 
+#endif
+
+#ifndef FSCTL_SET_INTEGRITY_INFORMATION_BUFFER
+
 struct _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER {
     WORD ChecksumAlgorithm;  // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
     WORD Reserved;           // Must be 0
@@ -140,6 +132,21 @@ struct _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER {
 
 using FSCTL_SET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER;
 using PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER*;
+
+#endif
+
+// https://github.com/mingw-w64/mingw-w64/issues/90#issuecomment-2829284729
+#ifndef DUPLICATE_EXTENTS_DATA
+
+struct _DUPLICATE_EXTENTS_DATA {
+    HANDLE FileHandle;
+    LARGE_INTEGER SourceFileOffset;
+    LARGE_INTEGER TargetFileOffset;
+    LARGE_INTEGER ByteCount;
+};
+
+using DUPLICATE_EXTENTS_DATA = _DUPLICATE_EXTENTS_DATA;
+using PDUPLICATE_EXTENTS_DATA = _DUPLICATE_EXTENTS_DATA*;
 
 #endif
 
@@ -611,7 +618,7 @@ void ExternalLinkFileProcess::runLinkFile()
     params += " -H " + QVariant(m_useHardLinks).toString();
 
 #if defined Q_OS_WIN32
-    SHELLEXECUTEINFO ShExecInfo;
+    SHELLEXECUTEINFOW ShExecInfo;
 
     fileLinkExe = fileLinkExe + ".exe";
 
@@ -620,8 +627,8 @@ void ExternalLinkFileProcess::runLinkFile()
     LPCWSTR programNameWin = (const wchar_t*)fileLinkExe.utf16();
     LPCWSTR paramsWin = (const wchar_t*)params.utf16();
 
-    // https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-shellexecuteinfoa
-    ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+    // https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-shellexecuteinfow
+    ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
     ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
     ShExecInfo.hwnd = NULL;  // Optional. A handle to the owner window, used to display and position any UI that the system might produce
                              // while executing this function.
@@ -632,7 +639,7 @@ void ExternalLinkFileProcess::runLinkFile()
     ShExecInfo.nShow = SW_HIDE;
     ShExecInfo.hInstApp = NULL;
 
-    ShellExecuteEx(&ShExecInfo);
+    ShellExecuteExW(&ShExecInfo);
 
     WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
     CloseHandle(ShExecInfo.hProcess);
@@ -702,7 +709,7 @@ bool deleteContents(const QString& path)
 
         fs::remove_all(entry.path(), err);
         if (err.value() != 0) {
-            qWarning().nospace() << "Could not delete directory entry " << entry.path() << ": " << QString::fromStdString(err.message());
+            qWarning().nospace() << "Could not delete directory entry " << QString::fromStdWString(entry.path().wstring()) << ": " << QString::fromStdString(err.message());
             ret = false;
         }
     }
@@ -776,7 +783,7 @@ QString pathTruncate(const QString& path, int depth)
     auto parts = QDir::toNativeSeparators(trunc).split(QDir::separator(), Qt::SkipEmptyParts);
 
     if (parts.startsWith(".") && !path.startsWith(".")) {
-        parts.removeFirst();
+        parts.removeAt(0);
     }
     if (QDir::toNativeSeparators(path).startsWith(QDir::separator())) {
         parts.prepend("");
@@ -1068,10 +1075,10 @@ QString createShortcut(QString destination, QString target, QStringList args, QS
 
     WCHAR wsz[MAX_PATH];
 
-    IShellLink* psl;
+    IShellLinkW* psl;
 
     // create an IShellLink instance - this stores the shortcut's attributes
-    hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
+    hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (LPVOID*)&psl);
     if (SUCCEEDED(hres)) {
         wmemset(wsz, 0, MAX_PATH);
         target.toWCharArray(wsz);

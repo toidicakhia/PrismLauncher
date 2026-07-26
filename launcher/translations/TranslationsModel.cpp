@@ -51,7 +51,7 @@
 #include "Application.h"
 #include "settings/SettingsObject.h"
 
-static constexpr QLatin1String g_defaultLangCode("en_US");
+static const QLatin1String g_defaultLangCode("en_US");
 
 namespace {
 enum class FileType : std::uint8_t { None, Qm, Po };
@@ -346,7 +346,7 @@ void TranslationsModel::reloadLocalFiles()
         }
         return a.languageName().toLower() < b.languageName().toLower();
     };
-    std::ranges::sort(d->m_languages, comp);
+    std::sort(d->m_languages.begin(), d->m_languages.end(), comp);
     endInsertRows();
 }
 
@@ -428,7 +428,7 @@ int TranslationsModel::columnCount([[maybe_unused]] const QModelIndex& parent) c
 
 QList<Language>::Iterator TranslationsModel::findLanguage(const QString& key) const
 {
-    return std::ranges::find_if(d->m_languages, [key](const Language& lang) { return lang.key == key; });
+    return std::find_if(d->m_languages.begin(), d->m_languages.end(), [key](const Language& lang) { return lang.key == key; });
 }
 
 std::optional<Language> TranslationsModel::findLanguageAsOptional(const QString& key) const
@@ -490,7 +490,7 @@ bool TranslationsModel::selectLanguage(QString key) const
     bool successful = false;
     // FIXME: this is likely never present. FIX IT.
     d->m_qtTranslator = std::make_unique<QTranslator>();
-    if (d->m_qtTranslator->load("qt_" + langCode, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+    if (d->m_qtTranslator->load("qt_" + langCode, QLibraryInfo::location(QLibraryInfo::TranslationsPath))) {
         qDebug() << "Loading Qt Language File for" << langCode.toLocal8Bit().constData() << "...";
         if (!QCoreApplication::installTranslator(d->m_qtTranslator.get())) {
             qCritical() << "Loading Qt Language File failed.";

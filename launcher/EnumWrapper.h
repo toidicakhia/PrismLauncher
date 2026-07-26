@@ -20,7 +20,6 @@
 
 #include <QString>
 #include <QtGlobal>
-#include <compare>
 #include <type_traits>
 
 template <typename Derived, typename EnumV>
@@ -33,11 +32,25 @@ struct EnumWrapper {
 
     constexpr bool isValid() const { return m_value != Derived::invalid(); }
 
-    bool operator==(const EnumWrapper&) const = default;
+    bool operator==(const EnumWrapper& other) const { return m_value == other.m_value; }
 
-    std::strong_ordering operator<=>(const EnumWrapper& other) const { return m_value <=> other.m_value; };
+    bool operator!=(const EnumWrapper& other) const { return m_value != other.m_value; }
 
-    std::strong_ordering operator<=>(Enum other) const { return m_value <=> other; }
+    bool operator<(const EnumWrapper& other) const { return m_value < other.m_value; }
+
+    bool operator<=(const EnumWrapper& other) const { return m_value <= other.m_value; }
+
+    bool operator>(const EnumWrapper& other) const { return m_value > other.m_value; }
+
+    bool operator>=(const EnumWrapper& other) const { return m_value >= other.m_value; }
+
+    bool operator<(Enum other) const { return m_value < other; }
+
+    bool operator<=(Enum other) const { return m_value <= other; }
+
+    bool operator>(Enum other) const { return m_value > other; }
+
+    bool operator>=(Enum other) const { return m_value >= other; }
 
     QString toString() const
     {

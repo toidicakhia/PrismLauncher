@@ -127,10 +127,10 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_
     QString last_path_segment = url_path_parts.takeLast();
 
     if (url_path_parts.size() >= 1 && url_path_parts.first().isEmpty())
-        url_path_parts.removeFirst();  // drop empty first segment (from leading / )
+        url_path_parts.removeAt(0);  // drop empty first segment (from leading / )
 
     if (url_path_parts.size() >= 1)
-        url_path_parts.removeLast();  // drop the next to last path segment
+        url_path_parts.removeAt(url_path_parts.size() - 1);  // drop the next to last path segment
 
     auto url_template = QStringLiteral("%1://%2/%3%4");
 
@@ -141,7 +141,7 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_
 
     // remove url parts one by one if it's still too long
     while (url_compact.length() > max_len && url_path_parts.size() >= 1) {
-        url_path_parts.removeLast();  // drop the next to last path segment
+        url_path_parts.removeAt(url_path_parts.size() - 1);  // drop the next to last path segment
         url_compact = url_path_parts.isEmpty()
                           ? url_template.arg(url.scheme(), url.host(), QStringList({ "...", last_path_segment }).join('/'), url.query())
                           : url_template.arg(url.scheme(), url.host(),
@@ -180,7 +180,7 @@ QString StringUtils::humanReadableFileSize(double bytes, bool use_si, int decima
 
 QString StringUtils::getRandomAlphaNumeric()
 {
-    return QUuid::createUuid().toString(QUuid::Id128);
+    return QUuid::createUuid().toString(QUuid::WithoutBraces);
 }
 
 QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QString& sep, Qt::CaseSensitivity cs)

@@ -55,7 +55,7 @@
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
 {
-    data.internalId = QUuid::createUuid().toString(QUuid::Id128);
+    data.internalId = QUuid::createUuid().toString(QUuid::WithoutBraces);
 }
 
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json)
@@ -82,8 +82,8 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     account->data.yggdrasilToken.validity = Validity::Certain;
     account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
     account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
-    account->data.minecraftProfile.id = uuidFromUsername(username).toString(QUuid::Id128);
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    account->data.minecraftProfile.id = uuidFromUsername(username).toString(QUuid::WithoutBraces);
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Validity::Certain;
     return account;
@@ -248,7 +248,7 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     // profile ID
     session->uuid = data.profileId();
     if (session->uuid.isEmpty())
-        session->uuid = uuidFromUsername(session->player_name).toString(QUuid::Id128);
+        session->uuid = uuidFromUsername(session->player_name).toString(QUuid::WithoutBraces);
     // 'legacy' or 'mojang', depending on account type
     session->user_type = typeString();
     if (!session->access_token.isEmpty()) {
@@ -286,8 +286,8 @@ QUuid MinecraftAccount::uuidFromUsername(QString username)
     // basically a reimplementation of Java's UUID#nameUUIDFromBytes
     QByteArray digest = QCryptographicHash::hash(input, QCryptographicHash::Md5);
 
-    auto bOr = [](QByteArray& array, qsizetype index, uint8_t value) { array[index] |= value; };
-    auto bAnd = [](QByteArray& array, qsizetype index, uint8_t value) { array[index] &= value; };
+    auto bOr = [](QByteArray& array, int index, uint8_t value) { array.data()[index] |= value; };
+    auto bAnd = [](QByteArray& array, int index, uint8_t value) { array.data()[index] &= value; };
     bAnd(digest, 6, 0x0f);  // clear version
     bOr(digest, 6, 0x30);   // set to version 3
     bAnd(digest, 8, 0x3f);  // clear variant

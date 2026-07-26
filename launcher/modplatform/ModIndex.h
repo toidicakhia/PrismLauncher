@@ -51,7 +51,24 @@ enum class ModLoaderType : std::uint16_t {
 
 ModLoaderType operator|(ModLoaderType lhs, ModLoaderType rhs);
 
-using enum ModLoaderType;
+inline uint qHash(const ModLoaderType& key, uint seed = 0) noexcept
+{
+    return ::qHash(static_cast<int>(key), seed);
+}
+
+constexpr auto None = ModLoaderType::None;
+constexpr auto NeoForge = ModLoaderType::NeoForge;
+constexpr auto Forge = ModLoaderType::Forge;
+constexpr auto Cauldron = ModLoaderType::Cauldron;
+constexpr auto LiteLoader = ModLoaderType::LiteLoader;
+constexpr auto Fabric = ModLoaderType::Fabric;
+constexpr auto Quilt = ModLoaderType::Quilt;
+constexpr auto DataPack = ModLoaderType::DataPack;
+constexpr auto Babric = ModLoaderType::Babric;
+constexpr auto BTA = ModLoaderType::BTA;
+constexpr auto LegacyFabric = ModLoaderType::LegacyFabric;
+constexpr auto Ornithe = ModLoaderType::Ornithe;
+constexpr auto Rift = ModLoaderType::Rift;
 
 Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags);
@@ -75,9 +92,16 @@ struct DependencyType : EnumWrapper<DependencyType, DependencyTypeValue> {
         return EnumWrapper<DependencyType, DependencyTypeValue>::fromString(str.toUpper());
     }
 
-    using enum DependencyTypeValue;
     using Base = EnumWrapper<DependencyType, DependencyTypeValue>;
     using Base::Base; /* inherit ctor */
+
+    static constexpr auto REQUIRED = DependencyTypeValue::REQUIRED;
+    static constexpr auto OPTIONAL = DependencyTypeValue::OPTIONAL;
+    static constexpr auto INCOMPATIBLE = DependencyTypeValue::INCOMPATIBLE;
+    static constexpr auto EMBEDDED = DependencyTypeValue::EMBEDDED;
+    static constexpr auto TOOL = DependencyTypeValue::TOOL;
+    static constexpr auto INCLUDE = DependencyTypeValue::INCLUDE;
+    static constexpr auto UNKNOWN = DependencyTypeValue::UNKNOWN;
 };
 
 enum class SideTypeValue : std::uint8_t {
@@ -96,9 +120,13 @@ struct SideType : EnumWrapper<SideType, SideTypeValue> {
                            std::pair{ NoSide, "" } };
     };
 
-    using enum SideTypeValue;
     using Base = EnumWrapper<SideType, SideTypeValue>;
     using Base::Base; /* inherit ctor */
+
+    static constexpr auto NoSide = SideTypeValue::NoSide;
+    static constexpr auto ClientSide = SideTypeValue::ClientSide;
+    static constexpr auto ServerSide = SideTypeValue::ServerSide;
+    static constexpr auto UniversalSide = SideTypeValue::UniversalSide;
 };
 
 namespace ProviderCapabilities {
@@ -128,9 +156,13 @@ struct IndexedVersionType : EnumWrapper<IndexedVersionType, IndexedVersionTypeVa
                            std::pair{ Alpha, "Alpha" } };
     };
 
-    using enum IndexedVersionTypeValue;
     using Base = EnumWrapper<IndexedVersionType, IndexedVersionTypeValue>;
     using Base::Base; /* inherit ctor */
+
+    static constexpr auto Unknown = IndexedVersionTypeValue::Unknown;
+    static constexpr auto Release = IndexedVersionTypeValue::Release;
+    static constexpr auto Beta = IndexedVersionTypeValue::Beta;
+    static constexpr auto Alpha = IndexedVersionTypeValue::Alpha;
 };
 
 struct Dependency {
@@ -241,11 +273,11 @@ struct OverrideDep {
 inline auto getOverrideDeps() -> QList<OverrideDep>
 {
     return {
-        { .quilt = "634179", .fabric = "306612", .slug = "API", .provider = ModPlatform::ResourceProvider::FLAME },
-        { .quilt = "720410", .fabric = "308769", .slug = "KotlinLibraries", .provider = ModPlatform::ResourceProvider::FLAME },
+        OverrideDep{ QStringLiteral("634179"), QStringLiteral("306612"), QStringLiteral("API"), ModPlatform::ResourceProvider::FLAME },
+        OverrideDep{ QStringLiteral("720410"), QStringLiteral("308769"), QStringLiteral("KotlinLibraries"), ModPlatform::ResourceProvider::FLAME },
 
-        { .quilt = "qvIfYCYJ", .fabric = "P7dR8mSH", .slug = "API", .provider = ModPlatform::ResourceProvider::MODRINTH },
-        { .quilt = "lwVhp9o5", .fabric = "Ha28R6CL", .slug = "KotlinLibraries", .provider = ModPlatform::ResourceProvider::MODRINTH }
+        OverrideDep{ QStringLiteral("qvIfYCYJ"), QStringLiteral("P7dR8mSH"), QStringLiteral("API"), ModPlatform::ResourceProvider::MODRINTH },
+        OverrideDep{ QStringLiteral("lwVhp9o5"), QStringLiteral("Ha28R6CL"), QStringLiteral("KotlinLibraries"), ModPlatform::ResourceProvider::MODRINTH }
     };
 }
 

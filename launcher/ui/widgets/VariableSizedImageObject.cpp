@@ -137,7 +137,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(
         m_meta_entry,
-        QString("images/%1").arg(QString(QCryptographicHash::hash(meta->url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
+        QString("images/%1").arg(QString(QCryptographicHash::hash(meta->url.toEncoded(), QCryptographicHash::Sha1).toHex())));
 
     auto job = new NetJob(QString("Load Image: %1").arg(meta->url.fileName()), APPLICATION->network());
     job->setAskRetry(false);

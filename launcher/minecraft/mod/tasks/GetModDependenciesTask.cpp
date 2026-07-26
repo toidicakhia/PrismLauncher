@@ -37,7 +37,7 @@ static Version mcVersion(BaseInstance* inst)
 
 static ModPlatform::ModLoaderTypes mcLoaders(BaseInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes{});
 }
 
 static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDependency> sel,
@@ -80,7 +80,7 @@ ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::D
             return o.provider == providerName && dep.addonId == (isQuilt ? o.fabric : o.quilt);
         });
         if (over != overide.cend()) {
-            return { .addonId = isQuilt ? over->quilt : over->fabric, .type = dep.type, .version = "" };
+            return { isQuilt ? over->quilt : over->fabric, dep.type, "" };
         }
     }
     return dep;
@@ -185,9 +185,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         tasks->addTask(getProjectInfoTask(pDep));
     }
 
-    ResourceAPI::DependencySearchArgs args = {
-        .dependency = dep, .mcVersion = m_version, .loader = m_loaderType, .includeChangelog = true
-    };
+    ResourceAPI::DependencySearchArgs args = { dep, m_version, m_loaderType, true };
     ResourceAPI::Callback<ModPlatform::IndexedVersion> callbacks;
     callbacks.on_fail = [](const QString& reason, int) {
         qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
@@ -201,7 +199,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
                                          [dep, provider](const auto& o) { return o.provider == provider && dep.addonId == o.quilt; });
                 if (over != overide.cend()) {
                     removePack(dep.addonId);
-                    addTask(prepareDependencyTask({ .addonId = over->fabric, .type = dep.type, .version = "" }, provider, level));
+                    addTask(prepareDependencyTask({ over->fabric, dep.type, "" }, provider, level));
                     return;
                 }
             }
@@ -219,7 +217,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         }
         if (dep.addonId.toString().isEmpty() && !pDep->version.addonId.toString().isEmpty()) {
             pDep->pack->addonId = pDep->version.addonId;
-            auto dep_ = getOverride({ .addonId = pDep->version.addonId, .type = pDep->dependency.type, .version = "" }, provider);
+            auto dep_ = getOverride({ pDep->version.addonId, pDep->dependency.type, "" }, provider);
             if (dep_.addonId != pDep->version.addonId) {
                 removePack(pDep->version.addonId);
                 addTask(prepareDependencyTask(dep_, provider, level));

@@ -368,11 +368,7 @@ void WorldList::installWorld(QFileInfo filename)
 
 std::unique_ptr<Task> WorldList::createInstallWorldTask(QFileInfo filename)
 {
-    return std::make_unique<InstallWorldTask>(InstallWorldTask::Args{
-        .worlds = this,
-        .sourceFile = filename,
-        .targetDir = m_dir.absolutePath(),
-    });
+    return std::make_unique<InstallWorldTask>(InstallWorldTask::Args{ this, filename, m_dir.absolutePath() });
 }
 
 std::unique_ptr<Task> WorldList::createCopyWorldTask(int index, const QString& name)
@@ -383,12 +379,7 @@ std::unique_ptr<Task> WorldList::createCopyWorldTask(int index, const QString& n
 
     const auto& world = m_worlds.at(index);
 
-    return std::make_unique<CopyWorldTask>(CopyWorldTask::Args{
-        .worlds = this,
-        .sourceFile = world.container(),
-        .targetDir = m_dir.absolutePath(),
-        .targetName = name,
-    });
+    return std::make_unique<CopyWorldTask>(CopyWorldTask::Args{ this, world.container(), m_dir.absolutePath(), name });
 }
 
 std::unique_ptr<Task> WorldList::createDeleteWorldTask(int index)
@@ -399,11 +390,7 @@ std::unique_ptr<Task> WorldList::createDeleteWorldTask(int index)
 
     const auto& world = m_worlds.at(index);
 
-    return std::make_unique<DeleteWorldTask>(DeleteWorldTask::Args{
-        .worlds = this,
-        .sourceFile = world.container(),
-        .displayName = world.name(),
-    });
+    return std::make_unique<DeleteWorldTask>(DeleteWorldTask::Args{ this, world.container(), world.name() });
 }
 
 bool WorldList::dropMimeData(const QMimeData* data,

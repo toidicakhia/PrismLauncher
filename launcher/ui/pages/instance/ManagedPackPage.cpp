@@ -250,7 +250,7 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
     : ManagedPackPage(inst, instance_window, parent)
 {
     Q_ASSERT(inst->isManagedPack());
-    connect(ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &ModrinthManagedPackPage::suggestVersion);
+    connect(ui->versionsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModrinthManagedPackPage::suggestVersion);
     connect(ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
     connect(ui->updateFromFileButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::updateFromFile);
 }
@@ -270,11 +270,11 @@ void ModrinthManagedPackPage::parseManagedPack()
     }
 
     ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
-    m_pack = { .addonId = m_inst->getManagedPackID() };
+    m_pack.addonId = m_inst->getManagedPackID();
 
     // Use default if no callbacks are set
     callbacks.on_succeed = [this](auto& doc) {
-        m_pack.versions = doc;
+        m_pack.versions = {doc.cbegin(), doc.cend()};
         m_pack.versionsLoaded = true;
 
         // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
@@ -300,12 +300,15 @@ void ModrinthManagedPackPage::parseManagedPack()
     };
     callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
-    m_fetch_job = m_api.getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                             .mcVersions = {},
-                                             .loaders = {},
-                                             .resourceType = ModPlatform::ResourceType::Modpack,
-                                             .includeChangelog = true },
-                                           std::move(callbacks));
+    {
+        ResourceAPI::VersionSearchArgs args{};
+        args.pack = std::make_shared<ModPlatform::IndexedPack>(m_pack);
+        args.mcVersions = {};
+        args.loaders = {};
+        args.resourceType = ModPlatform::ResourceType::Modpack;
+        args.includeChangelog = true;
+        m_fetch_job = m_api.getProjectVersions(std::move(args), std::move(callbacks));
+    }
 
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
@@ -386,7 +389,7 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
     : ManagedPackPage(inst, instance_window, parent)
 {
     Q_ASSERT(inst->isManagedPack());
-    connect(ui->versionsComboBox, &QComboBox::currentIndexChanged, this, &FlameManagedPackPage::suggestVersion);
+    connect(ui->versionsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlameManagedPackPage::suggestVersion);
     connect(ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
     connect(ui->updateFromFileButton, &QPushButton::clicked, this, &FlameManagedPackPage::updateFromFile);
 }
@@ -423,13 +426,13 @@ void FlameManagedPackPage::parseManagedPack()
     }
 
     QString id = m_inst->getManagedPackID();
-    m_pack = { .addonId = id };
+    m_pack.addonId = id;
 
     ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
 
     // Use default if no callbacks are set
     callbacks.on_succeed = [this](auto& doc) {
-        m_pack.versions = doc;
+        m_pack.versions = {doc.cbegin(), doc.cend()};
         m_pack.versionsLoaded = true;
 
         // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
@@ -453,12 +456,15 @@ void FlameManagedPackPage::parseManagedPack()
     };
     callbacks.on_fail = [this](const QString& /*reason*/, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
-    m_fetch_job = m_api.getProjectVersions({ .pack = std::make_shared<ModPlatform::IndexedPack>(m_pack),
-                                             .mcVersions = {},
-                                             .loaders = {},
-                                             .resourceType = ModPlatform::ResourceType::Modpack,
-                                             .includeChangelog = true },
-                                           std::move(callbacks));
+    {
+        ResourceAPI::VersionSearchArgs args{};
+        args.pack = std::make_shared<ModPlatform::IndexedPack>(m_pack);
+        args.mcVersions = {};
+        args.loaders = {};
+        args.resourceType = ModPlatform::ResourceType::Modpack;
+        args.includeChangelog = true;
+        m_fetch_job = m_api.getProjectVersions(std::move(args), std::move(callbacks));
+    }
 
     m_fetch_job->start();
 }

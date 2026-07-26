@@ -84,6 +84,22 @@
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "$penv{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             }
+        },
+        {
+            "name": "windows_legacy",
+            "displayName": "Windows (MSVC, Qt 5, Win7)",
+            "inherits": [
+                "base"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$penv{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "Launcher_QT_VERSION_MAJOR": "5"
+            }
         }
     ],
     "buildPresets": [
@@ -134,6 +150,16 @@
                 "rhs": "Windows"
             },
             "configurePreset": "windows_msvc"
+        },
+        {
+            "name": "windows_legacy",
+            "displayName": "Windows (MSVC, Qt 5, Win7)",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "configurePreset": "windows_legacy"
         }
     ],
     "testPresets": [
@@ -217,6 +243,19 @@
                 "rhs": "Windows"
             },
             "configurePreset": "windows_msvc"
+        },
+        {
+            "name": "windows_legacy",
+            "displayName": "Windows (MSVC, Qt 5, Win7)",
+            "inherits": [
+                "base"
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "configurePreset": "windows_legacy"
         }
     ]
 }

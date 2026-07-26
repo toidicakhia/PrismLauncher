@@ -149,7 +149,11 @@ uint8_t McClient::readByte(QByteArray& data)
 
 void McClient::writeUInt16(QByteArray& data, const uint16_t value)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QDataStream stream(&data, QIODeviceBase::Append);
+#else
+    QDataStream stream(&data, QIODevice::Append);
+#endif
     stream.setByteOrder(QDataStream::BigEndian);
     stream << value;
 }

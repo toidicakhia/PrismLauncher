@@ -36,30 +36,52 @@
 
 #include "LoggedProcess.h"
 #include <QDebug>
-#include <QStringDecoder>
 #include "MessageLevel.h"
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringDecoder>
 
 LoggedProcess::LoggedProcess(const QStringConverter::Encoding output_codec, QObject* parent)
     : QProcess(parent), m_err_decoder(output_codec), m_out_decoder(output_codec)
+#else
+LoggedProcess::LoggedProcess(QTextCodec* output_codec, QObject* parent)
+    : QProcess(parent), m_err_decoder(output_codec->makeDecoder()), m_out_decoder(output_codec->makeDecoder())
+#endif
 {
     // QProcess has a strange interface... let's map a lot of those into a few.
     connect(this, &QProcess::readyReadStandardOutput, this, &LoggedProcess::on_stdOut);
     connect(this, &QProcess::readyReadStandardError, this, &LoggedProcess::on_stdErr);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     connect(this, &QProcess::finished, this, &LoggedProcess::on_exit);
+#else
+    connect(this, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this, &LoggedProcess::on_exit);
+#endif
     connect(this, &QProcess::errorOccurred, this, &LoggedProcess::on_error);
     connect(this, &QProcess::stateChanged, this, &LoggedProcess::on_stateChange);
 }
 
 LoggedProcess::~LoggedProcess()
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    delete m_err_decoder;
+    delete m_out_decoder;
+#endif
     if (m_is_detachable) {
         setProcessState(QProcess::NotRunning);
     }
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 QStringList LoggedProcess::reprocess(const QByteArray& data, QStringDecoder& decoder)
+#else
+QStringList LoggedProcess::reprocess(const QByteArray& data, QTextDecoder* decoder)
+#endif
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QString str = decoder(data);
+#else
+    QString str = decoder->toUnicode(data);
+#endif
 
     if (!m_leftover_line.isEmpty()) {
         str.prepend(m_leftover_line);

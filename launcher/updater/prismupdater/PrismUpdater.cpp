@@ -1122,7 +1122,7 @@ void PrismUpdaterApp::loadReleaseList()
         return fail("updating from a non github url is not supported");
 
     auto path_parts = github_repo.path().split('/');
-    path_parts.removeFirst();  // empty segment from leading /
+    path_parts.removeAt(0);  // empty segment from leading /
     auto repo_owner = path_parts.takeFirst();
     auto repo_name = path_parts.takeFirst();
     auto api_url = QString("https://api.github.com/repos/%1/%2/releases").arg(repo_owner, repo_name);

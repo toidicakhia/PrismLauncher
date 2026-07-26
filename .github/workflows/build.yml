@@ -72,6 +72,12 @@ jobs:
             vcvars-arch: amd64
             qt-version: 6.10.2
 
+          - os: windows-2022
+            artifact-name: Windows-MSVC-Legacy
+            cmake-preset: windows_legacy
+            vcvars-arch: amd64
+            qt-version: 5.15.2
+
           - os: windows-11-arm
             artifact-name: Windows-MSVC-arm64
             cmake-preset: windows_msvc
@@ -91,7 +97,7 @@ jobs:
         shell: ${{ matrix.msystem != '' && 'msys2 {0}' || 'bash' }}
 
     env:
-      ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt6
+      ARTIFACT_NAME: ${{ matrix.artifact-name }}-Qt${{ matrix.qt-version == '5.15.2' && '5' || '6' }}
       BUILD_PLATFORM: official
       BUILD_TYPE: ${{ inputs.build-type || 'Debug' }}
       CMAKE_PRESET: ${{ matrix.cmake-preset }}

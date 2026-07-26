@@ -1012,7 +1012,9 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     const QString env = settings->get("Env").toString();
     if (auto envMap = Json::toMap(env); !envMap.isEmpty()) {
         out << "Custom environment variables:";
-        for (auto [key, value] : envMap.asKeyValueRange()) {
+        for (auto it = envMap.constBegin(); it != envMap.constEnd(); ++it) {
+            auto& key = it.key();
+            auto& value = it.value();
             out << indent + key + "=" + value.toString();
         }
         out << emptyLine;

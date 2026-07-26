@@ -340,12 +340,12 @@ bool SkinList::deleteSkin(const QString& key, bool trash)
         auto s = m_skinList[idx];
         if (trash) {
             if (FS::trash(s.getPath(), nullptr)) {
-                m_skinList.remove(idx);
+                m_skinList.removeAt(idx);
                 save();
                 return true;
             }
         } else if (QFile::remove(s.getPath())) {
-            m_skinList.remove(idx);
+            m_skinList.removeAt(idx);
             save();
             return true;
         }

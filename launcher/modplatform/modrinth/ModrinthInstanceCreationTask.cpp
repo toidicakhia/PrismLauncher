@@ -276,12 +276,10 @@ std::unique_ptr<MinecraftInstance> ModrinthCreationTask::createInstance()
         }
         qDebug() << "Will try to download" << file.downloads.front() << "to" << filePath;
 
-        Net::ModrinthDownloadMeta meta{
-            .reason = m_instance.has_value() ? "update" : "modpack",
-            .gameVersion = m_minecraft_version,
-            .loader = loader,
-            .dependentOn = !m_managed_id.isEmpty() ? m_managed_version_id : ""
-        };
+        Net::ModrinthDownloadMeta meta{ m_instance.has_value() ? "update" : "modpack",
+                                        m_minecraft_version,
+                                        loader,
+                                        !m_managed_id.isEmpty() ? m_managed_version_id : "" };
 
         QUrl downloadUrl = file.downloads.dequeue();
         auto dl = Net::ApiDownload::makeFile(downloadUrl, filePath, Net::Download::Option::NoOptions, meta);

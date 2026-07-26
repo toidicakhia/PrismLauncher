@@ -354,7 +354,7 @@ optional<QString> read_string(nbt::value& parent, const char* name)
             return nullopt;
         }
         auto& tag_str = namedValue.as<nbt::tag_string>();
-        return QString::fromUtf8(tag_str.get());
+        return QString::fromStdString(tag_str.get());
     } catch ([[maybe_unused]] const std::out_of_range& e) {
         // fallback for old world formats
         qWarning() << "String NBT tag" << name << "could not be found.";

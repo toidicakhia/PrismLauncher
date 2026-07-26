@@ -172,7 +172,7 @@ void BaseEntityLoadTask::executeTask()
      * If that fails, the file is not written to storage.
      */
     if (!m_entity->m_sha256.isEmpty())
-        dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha256, m_entity->m_sha256));
+        dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha256, m_entity->m_sha256));
     dl->addValidator(new ParsingValidator(m_entity));
     m_task->addNetAction(dl);
     m_task->setAskRetry(false);

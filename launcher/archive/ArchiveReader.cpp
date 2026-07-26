@@ -68,7 +68,7 @@ QByteArray ArchiveReader::File::readAll(int* outStatus)
 
     int status = 0;
     while ((status = archive_read_data_block(m_archive.get(), &buff, &size, &offset)) == ARCHIVE_OK) {
-        data.append(static_cast<const char*>(buff), static_cast<qsizetype>(size));
+        data.append(static_cast<const char*>(buff), static_cast<int>(size));
     }
     if (status != ARCHIVE_EOF && status != ARCHIVE_OK) {
         qWarning() << "libarchive read error:" << archive_error_string(m_archive.get());

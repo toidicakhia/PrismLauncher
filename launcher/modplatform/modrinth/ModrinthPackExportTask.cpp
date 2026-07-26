@@ -101,10 +101,10 @@ void ModrinthPackExportTask::collectHashes()
 
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
-        if (!std::ranges::any_of(PREFIXES, [&relative](const QString& prefix) { return relative.startsWith(prefix); })) {
+        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(), [&relative](const QString& prefix) { return relative.startsWith(prefix); })) {
             continue;
         }
-        if (!std::ranges::any_of(FILE_EXTENSIONS, [&relative](const QString& extension) {
+        if (!std::any_of(FILE_EXTENSIONS.begin(), FILE_EXTENSIONS.end(), [&relative](const QString& extension) {
                 return relative.endsWith('.' + extension) || relative.endsWith('.' + extension + ".disabled");
             })) {
             continue;
@@ -189,10 +189,10 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
                                              [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
                 fileIter != files_array.end()) {
                 // map the file to the url
-                resolvedFiles[iterator.key()] = ResolvedFile{ .sha1 = fileIter->toObject()["hashes"].toObject()["sha1"].toString(),
-                                                              .sha512 = iterator.value(),
-                                                              .url = fileIter->toObject()["url"].toString(),
-                                                              .size = fileIter->toObject()["size"].toInt() };
+                resolvedFiles[iterator.key()] = ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(),
+                                                              iterator.value(),
+                                                              fileIter->toObject()["url"].toString(),
+                                                              fileIter->toObject()["size"].toInt() };
             }
         }
     } catch (const Json::JsonException& e) {

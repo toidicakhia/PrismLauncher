@@ -84,9 +84,9 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     m_ui->sortByBox->addItem(tr("Sort by Author"));
     m_ui->sortByBox->addItem(tr("Sort by Total Downloads"));
 
-    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &FlamePage::triggerSearch);
+    connect(m_ui->sortByBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlamePage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlamePage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &FlamePage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlamePage::onVersionSelectionChanged);
 
     m_ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     m_ui->packDescription->setMetaEntry("FlamePacks");
@@ -168,7 +168,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
                 return;  // wrong request
             }
 
-            m_current->versions = doc;
+            m_current->versions = {doc.cbegin(), doc.cend()};
             m_current->versionsLoaded = true;
             auto pred = [this](const ModPlatform::IndexedVersion& v) {
                 if (auto filter = m_filterWidget->getFilter())

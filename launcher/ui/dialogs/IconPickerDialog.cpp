@@ -167,7 +167,7 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
     auto buttonFolder = ui->buttonBox->addButton(tr("Open Folder"), QDialogButtonBox::ResetRole);
     connect(buttonFolder, &QPushButton::clicked, this, &IconPickerDialog::openFolder);
     connect(ui->searchLine, &QLineEdit::textChanged, this, &IconPickerDialog::filterIcons);
-    connect(ui->contextCombo, &QComboBox::currentIndexChanged, this, [this](int index) {
+    connect(ui->contextCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
         IconPickerCategory category = static_cast<IconPickerCategory>(ui->contextCombo->itemData(index).toInt());
         filterIconsByCategory(category);
     });

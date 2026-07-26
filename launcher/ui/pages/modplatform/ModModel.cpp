@@ -52,15 +52,17 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
     auto sort = getCurrentSortingMethodByIndex();
 
-    return { .type = ModPlatform::ResourceType::Mod,
-             .offset = m_next_search_offset,
-             .search = m_search_term,
-             .sorting = sort,
-             .loaders = loaders,
-             .versions = versions,
-             .side = side,
-             .categoryIds = categories,
-             .openSource = m_filter->openSource };
+    ResourceAPI::SearchArgs args{};
+    args.type = ModPlatform::ResourceType::Mod;
+    args.offset = m_next_search_offset;
+    args.search = m_search_term;
+    args.sorting = sort;
+    args.loaders = loaders;
+    args.versions = versions;
+    args.side = side;
+    args.categoryIds = categories;
+    args.openSource = m_filter->openSource;
+    return args;
 }
 
 ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelIndex& index)
@@ -80,7 +82,12 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelInd
         loaders = m_filter->loaders;
     }
 
-    return { .pack = pack, .mcVersions = versions, .loaders = loaders, .resourceType = ModPlatform::ResourceType::Mod };
+    ResourceAPI::VersionSearchArgs args{};
+    args.pack = pack;
+    args.mcVersions = versions;
+    args.loaders = loaders;
+    args.resourceType = ModPlatform::ResourceType::Mod;
+    return args;
 }
 
 ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(const QModelIndex& index)
@@ -104,7 +111,7 @@ void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filte
 bool ModModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
 {
     auto allMods = static_cast<MinecraftInstance&>(m_base_instance).loaderModList()->allMods();
-    return std::ranges::any_of(allMods, [pack](Mod* mod) {
+    return std::any_of(allMods.begin(), allMods.end(), [pack](Mod* mod) {
         if (auto meta = mod->metadata(); meta) {
             return meta->provider == pack->provider && meta->project_id == pack->addonId;
         }

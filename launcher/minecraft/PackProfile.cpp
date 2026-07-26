@@ -398,7 +398,7 @@ void PackProfile::insertComponent(size_t index, ComponentPtr component)
         return;
     }
     beginInsertRows(QModelIndex(), static_cast<int>(index), static_cast<int>(index));
-    d->components.insert(index, component);
+    d->components.insert(static_cast<int>(index), component);
     d->componentIndex[id] = component;
     endInsertRows();
     connect(component.get(), &Component::dataChanged, this, &PackProfile::componentDataChanged);
@@ -509,7 +509,7 @@ ComponentPtr PackProfile::getComponent(size_t index)
     if (index >= static_cast<size_t>(d->components.size())) {
         return nullptr;
     }
-    return d->components[index];
+    return d->components[static_cast<int>(index)];
 }
 
 QVariant PackProfile::data(const QModelIndex& index, int role) const

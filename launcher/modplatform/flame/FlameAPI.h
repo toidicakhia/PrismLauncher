@@ -133,7 +133,7 @@ class FlameAPI : public ResourceAPI {
         if (args.mcVersions.has_value())
             url += QString("&gameVersion=%1").arg(args.mcVersions.value().front().toString());
 
-        if (args.loaders.has_value() && args.loaders.value() != ModPlatform::ModLoaderType::DataPack &&
+        if (args.loaders.has_value() && !(args.loaders.value() & ModPlatform::ModLoaderType::DataPack) &&
             ModPlatform::hasSingleModLoaderSelected(args.loaders.value())) {
             int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loaders.value())));
             url += QString("&modLoaderType=%1").arg(mappedModLoader);

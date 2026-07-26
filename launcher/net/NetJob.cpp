@@ -69,6 +69,7 @@ void NetJob::executeNextSubTask()
     // We're finished, check for failures and retry if we can (up to 3 times)
     if (isRunning() && m_queue.isEmpty() && m_doing.isEmpty() && !m_failed.isEmpty() && m_try < 3) {
         m_try += 1;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
         m_failed.removeIf([this](QHash<Task*, Task::Ptr>::iterator task) {
             // there is no point in retying on 404 Not Found
             if (static_cast<Net::NetRequest*>(task->get())->replyStatusCode() == 404) {
@@ -78,6 +79,20 @@ void NetJob::executeNextSubTask()
             m_queue.enqueue(*task);
             return true;
         });
+#else
+        {
+            auto it = m_failed.begin();
+            while (it != m_failed.end()) {
+                if (static_cast<Net::NetRequest*>(it.value().get())->replyStatusCode() != 404) {
+                    m_done.remove(it.key());
+                    m_queue.enqueue(it.value());
+                    it = m_failed.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+#endif
     }
     ConcurrentTask::executeNextSubTask();
 }

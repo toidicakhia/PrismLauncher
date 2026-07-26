@@ -76,7 +76,11 @@ ApplicationId ApplicationId::fromTraditionalApp()
     prefix.remove(s_removeChars);
     prefix.truncate(6);
     QByteArray idc = protoId.toUtf8();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     quint16 idNum = qChecksum(idc);
+#else
+    quint16 idNum = qChecksum(idc.constData(), idc.size());
+#endif
     auto socketName = QLatin1String("pl") + prefix + QLatin1Char('-') + QString::number(idNum, 16).left(12);
 #if defined(Q_OS_WIN)
     if (!pProcessIdToSessionId) {
@@ -96,7 +100,7 @@ ApplicationId ApplicationId::fromTraditionalApp()
 
 ApplicationId ApplicationId::fromPathAndVersion(const QString& dataPath, const QString& version)
 {
-    QCryptographicHash shasum(QCryptographicHash::Algorithm::Sha1);
+    QCryptographicHash shasum(QCryptographicHash::Sha1);
     QString result = dataPath + QLatin1Char('-') + version;
     shasum.addData(result.toUtf8());
     return ApplicationId(QLatin1String("pl") + QString::fromLatin1(shasum.result().toHex()).left(12));

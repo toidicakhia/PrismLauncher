@@ -21,29 +21,29 @@ ResourcePackResourceModel::ResourcePackResourceModel(const BaseInstance& base_in
 ResourceAPI::SearchArgs ResourcePackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return {
-        .type = ModPlatform::ResourceType::ResourcePack,
-        .offset = m_next_search_offset,
-        .search = m_search_term,
-        .sorting = sort,
-        .loaders = {},
-        .versions = {},
-        .side = {},
-        .categoryIds = {},
-        .openSource = {},
-    };
+    ResourceAPI::SearchArgs args{};
+    args.type = ModPlatform::ResourceType::ResourcePack;
+    args.offset = m_next_search_offset;
+    args.search = m_search_term;
+    args.sorting = sort;
+    return args;
 }
 
 ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { .pack = pack, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::ResourcePack };
+    ResourceAPI::VersionSearchArgs args{};
+    args.pack = pack;
+    args.resourceType = ModPlatform::ResourceType::ResourcePack;
+    return args;
 }
 
 ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { .pack = pack };
+    ResourceAPI::ProjectInfoArgs args{};
+    args.pack = pack;
+    return args;
 }
 
 void ResourcePackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

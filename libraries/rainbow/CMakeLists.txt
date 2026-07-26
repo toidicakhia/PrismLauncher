@@ -3,6 +3,8 @@ project(rainbow)
 
 if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     find_package(Qt6 COMPONENTS Core Gui REQUIRED)
+elseif(Launcher_QT_VERSION_MAJOR EQUAL 5)
+    find_package(Qt5 COMPONENTS Core Gui REQUIRED)
 endif()
 
 set(RAINBOW_SOURCES

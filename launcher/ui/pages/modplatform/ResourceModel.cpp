@@ -357,7 +357,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
 
     auto cacheEntry = APPLICATION->metacache()->resolveEntry(
         metaEntryBase(),
-        QString("logos/%1").arg(QString(QCryptographicHash::hash(url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
+        QString("logos/%1").arg(QString(QCryptographicHash::hash(url.toEncoded(), QCryptographicHash::Sha1).toHex())));
     auto iconFetchAction = Net::ApiDownload::makeCached(url, cacheEntry);
 
     auto fullFilePath = cacheEntry->getFullPath();
@@ -391,7 +391,7 @@ void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&
     QList<ModPlatform::IndexedPack::Ptr> filteredNewList;
     for (auto pack : newList) {
         ModPlatform::IndexedPack::Ptr p;
-        if (auto sel = std::ranges::find_if(m_selected,
+        if (auto sel = std::find_if(m_selected.begin(), m_selected.end(),
                                             [&pack](const DownloadTaskPtr& i) {
                                                 const auto ipack = i->getPack();
                                                 return ipack->provider == pack->provider && ipack->addonId == pack->addonId;
@@ -481,7 +481,7 @@ void ResourceModel::versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>
         return;
     }
 
-    currentPack->versions = doc;
+    currentPack->versions = {doc.cbegin(), doc.cend()};
     currentPack->versionsLoaded = true;
 
     // Cache info :^)
@@ -540,7 +540,7 @@ void ResourceModel::removePack(const QString& rem)
                 ++it;
     }
 #endif
-    auto pack = std::ranges::find_if(m_packs, [&rem](const ModPlatform::IndexedPack::Ptr& i) { return rem == i->name; });
+    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](const ModPlatform::IndexedPack::Ptr& i) { return rem == i->name; });
     if (pack == m_packs.end()) {  // ignore it if is not in the current search
         return;
     }

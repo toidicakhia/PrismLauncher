@@ -37,7 +37,7 @@ void DataMigrationTask::dryRunFinished()
     disconnect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::dryRunFinished);
     disconnect(&m_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::dryRunAborted);
 
-    if (!m_copyFuture.isValid() || !m_copyFuture.result()) {
+    if (!m_copyFuture.isFinished() || !m_copyFuture.result()) {
         emitFailed(tr("Failed to scan source path."));
         return;
     }
@@ -71,7 +71,7 @@ void DataMigrationTask::copyFinished()
     disconnect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::copyFinished);
     disconnect(&m_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::copyAborted);
 
-    if (!m_copyFuture.isValid() || !m_copyFuture.result()) {
+    if (!m_copyFuture.isFinished() || !m_copyFuture.result()) {
         emitFailed(tr("Some paths could not be copied!"));
         return;
     }

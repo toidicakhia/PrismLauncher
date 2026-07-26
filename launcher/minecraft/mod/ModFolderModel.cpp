@@ -274,7 +274,7 @@ void ModFolderModel::onParseSucceeded(int ticket, const QString& resourceId)
 namespace {
 Mod* findById(QSet<Mod*> mods, const QString& resourceId)
 {
-    auto found = std::ranges::find_if(mods, [resourceId](Mod* m) { return m->mod_id() == resourceId; });
+    auto found = std::find_if(mods.begin(), mods.end(), [resourceId](Mod* m) { return m->mod_id() == resourceId; });
     return found != mods.end() ? *found : nullptr;
 }
 }  // namespace
@@ -291,7 +291,7 @@ void ModFolderModel::onParseFinished()
     m_requiredBy.clear();
 
     auto findByProjectID = [mods](const QVariant& modId, ModPlatform::ResourceProvider provider) -> Mod* {
-        auto found = std::ranges::find_if(mods, [modId, provider](Mod* m) {
+        auto found = std::find_if(mods.begin(), mods.end(), [modId, provider](Mod* m) {
             return m->metadata() && m->metadata()->provider == provider && m->metadata()->project_id == modId;
         });
         return found != mods.end() ? *found : nullptr;
@@ -336,12 +336,12 @@ QSet<Mod*> collectMods(const QSet<Mod*>& mods, QHash<QString, QSet<Mod*>> relati
     QSet<Mod*> needToCheck = {};
     for (auto* mod : mods) {
         auto id = mod->mod_id();
-        if (!seen.contains(id)) {
+        if (!seen.count(id)) {
             seen.insert(id);
             for (auto* affected : relation[id]) {
                 auto affectedId = affected->mod_id();
 
-                if (findById(mods, affectedId) == nullptr && !seen.contains(affectedId)) {
+                if (findById(mods, affectedId) == nullptr && !seen.count(affectedId)) {
                     if (shouldBeEnabled != affected->enabled()) {
                         affectedList << affected;
                     }
@@ -427,7 +427,16 @@ bool ModFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAc
     auto requiredToEnable = collectMods(toEnable, m_requires, seen, true);
     auto requiredToDisable = collectMods(toDisable, m_requiredBy, seen, false);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
     toDisable.removeIf([toEnable](Mod* m) { return toEnable.contains(m); });
+#else
+    for (auto it = toDisable.begin(); it != toDisable.end();) {
+        if (toEnable.contains(*it))
+            it = toDisable.erase(it);
+        else
+            ++it;
+    }
+#endif
     auto toList = [this](const QSet<Mod*>& mods) {
         QModelIndexList list;
         for (auto* mod : mods) {

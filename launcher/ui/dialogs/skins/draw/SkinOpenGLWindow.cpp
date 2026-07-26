@@ -92,8 +92,13 @@ void SkinOpenGLWindow::mouseMoveEvent(QMouseEvent* event)
     }
 
     if (m_isMousePressed) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         int dx = event->position().x() - m_mousePosition.x();
         int dy = event->position().y() - m_mousePosition.y();
+#else
+        int dx = event->localPos().x() - m_mousePosition.x();
+        int dy = event->localPos().y() - m_mousePosition.y();
+#endif
 
         m_yaw += dx * 0.5f;
         m_pitch += dy * 0.5f;

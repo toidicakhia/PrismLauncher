@@ -37,9 +37,9 @@ void XboxAuthorizationStep::perform()
     const auto xboxAuthData = xboxAuthTemplate.arg(m_data->userToken.token, m_relyingParty);
     // http://xboxlive.com
     const QUrl url("https://xsts.auth.xboxlive.com/xsts/authorize");
-    auto headers = QList<Net::HeaderPair>{ { .headerName = "Content-Type", .headerValue = "application/json" },
-                                           { .headerName = "Accept", .headerValue = "application/json" },
-                                           { .headerName = "x-xbl-contract-version", .headerValue = "1" } };
+    auto headers = QList<Net::HeaderPair>{ { "Content-Type", "application/json" },
+                                           { "Accept", "application/json" },
+                                           { "x-xbl-contract-version", "1" } };
     auto [request, response] = Net::Upload::makeByteArray(url, xboxAuthData.toUtf8());
     m_request = request;
     m_request->addHeaderProxy(std::make_unique<Net::RawHeaderProxy>(headers));

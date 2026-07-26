@@ -46,7 +46,7 @@ void FlameCheckUpdate::executeTask()
     for (auto* resource : m_resources) {
         auto project = std::make_shared<ModPlatform::IndexedPack>();
         project->addonId = resource->metadata()->project_id.toString();
-        auto versionsUrlOptional = FlameAPI().getVersionsURL({ .pack = project, .mcVersions = m_gameVersions });
+        auto versionsUrlOptional = FlameAPI().getVersionsURL({ project, m_gameVersions, {}, ModPlatform::ResourceType::Mod });
         if (!versionsUrlOptional.has_value()) {
             continue;
         }

@@ -49,10 +49,10 @@ Net::ModrinthDownloadMeta createModrinthMeta(BaseInstance* instance, QString rea
 
     auto loaders = profile->getModLoadersList();
 
-    return { .reason = std::move(reason),
-             .gameVersion = profile->getComponentVersion("net.minecraft"),
-             .loader = !loaders.isEmpty() ? ModPlatform::getModLoaderAsString(loaders.first()) : "",
-             .dependentOn = std::move(dependentOn) };
+    return { std::move(reason),
+             profile->getComponentVersion("net.minecraft"),
+             !loaders.isEmpty() ? ModPlatform::getModLoaderAsString(loaders.first()) : "",
+             std::move(dependentOn) };
 }
 }  // namespace
 
@@ -80,19 +80,19 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
     if (!m_pack_version.hash_type.isEmpty() && !m_pack_version.hash.isEmpty()) {
         switch (Hashing::algorithmFromString(m_pack_version.hash_type)) {
             case Hashing::Algorithm::Md4:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Md4, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md4, m_pack_version.hash));
                 break;
             case Hashing::Algorithm::Md5:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Md5, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, m_pack_version.hash));
                 break;
             case Hashing::Algorithm::Sha1:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha1, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, m_pack_version.hash));
                 break;
             case Hashing::Algorithm::Sha256:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha256, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha256, m_pack_version.hash));
                 break;
             case Hashing::Algorithm::Sha512:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha512, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha512, m_pack_version.hash));
                 break;
             default:
                 break;

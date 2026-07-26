@@ -66,6 +66,7 @@ class BaseInstance;
 
 /// Shortcut saving target representations
 enum class ShortcutTarget { Desktop, Applications, Other };
+Q_DECLARE_METATYPE(ShortcutTarget)
 
 /// Shortcut data representation
 struct ShortcutData {

@@ -209,7 +209,7 @@ void FlamePackExportTask::makeApiRequest()
                     return;
                 }
 
-                auto fingerprint = QString::number(fileObj["fileFingerprint"].toInteger());
+                auto fingerprint = QString::number(fileObj["fileFingerprint"].toVariant().toLongLong());
                 auto mod = pendingHashes.find(fingerprint);
                 if (mod == pendingHashes.end()) {
                     qWarning() << "Invalid fingerprint from the API response.";

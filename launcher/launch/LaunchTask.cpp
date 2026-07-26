@@ -37,7 +37,6 @@
 
 #include "launch/LaunchTask.h"
 #include <assert.h>
-#include <QAnyStringView>
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDir>

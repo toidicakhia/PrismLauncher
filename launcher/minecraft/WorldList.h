@@ -44,7 +44,7 @@ class WorldList : public QAbstractListModel {
 
     size_t size() const { return m_worlds.size(); };
     bool empty() const { return size() == 0; }
-    World& operator[](size_t index) { return m_worlds[index]; }
+    World& operator[](int index) { return m_worlds[index]; }
 
     /// Reloads the mod list and returns true if the list changed.
     virtual bool update();

@@ -246,7 +246,7 @@ void PackInstallTask::deleteExistingFiles()
     };
 
     auto shouldKeep = [keeps, getPathForBase, convertToSystemPath](const QString& fullPath) {
-        if (std::ranges::any_of(keeps.files, [&fullPath, &getPathForBase, &convertToSystemPath](const auto& item) {
+        if (std::any_of(keeps.files.begin(), keeps.files.end(), [&fullPath, &getPathForBase, &convertToSystemPath](const auto& item) {
                 auto basePath = getPathForBase(item.base);
                 auto targetPath = convertToSystemPath(item.target);
                 auto path = FS::PathCombine(basePath, targetPath);
@@ -255,7 +255,7 @@ void PackInstallTask::deleteExistingFiles()
             return true;
         }
 
-        if (std::ranges::any_of(keeps.folders, [&fullPath, &getPathForBase, &convertToSystemPath](const auto& item) {
+        if (std::any_of(keeps.folders.begin(), keeps.folders.end(), [&fullPath, &getPathForBase, &convertToSystemPath](const auto& item) {
                 auto basePath = getPathForBase(item.base);
                 auto targetPath = convertToSystemPath(item.target);
                 auto path = FS::PathCombine(basePath, targetPath);
@@ -854,7 +854,7 @@ void PackInstallTask::downloadMods()
                     continue;
                 }
                 auto modIter =
-                    std::ranges::find_if(blockedMods, [blocked](const VersionMod& mod) { return mod.url == blocked.websiteUrl; });
+                    std::find_if(blockedMods.begin(), blockedMods.end(), [blocked](const VersionMod& mod) { return mod.url == blocked.websiteUrl; });
                 if (modIter == blockedMods.end()) {
                     continue;
                 }
@@ -918,7 +918,12 @@ void PackInstallTask::onModsDownloaded()
 
     if (!modsToExtract.empty() || !modsToDecomp.empty() || !modsToCopy.empty()) {
         m_modExtractFuture =
-            QtConcurrent::run(QThreadPool::globalInstance(), &PackInstallTask::extractMods, this, modsToExtract, modsToDecomp, modsToCopy);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            QtConcurrent::run(QThreadPool::globalInstance(), &PackInstallTask::extractMods, this, modsToExtract, modsToDecomp, modsToCopy)
+#else
+            QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy)
+#endif
+            ;
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onModsExtracted);
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::emitAborted);
         m_modExtractFutureWatcher.setFuture(m_modExtractFuture);

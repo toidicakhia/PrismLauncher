@@ -281,7 +281,7 @@ QString BaseInstance::uuid() const
 
 void BaseInstance::regenerateUuid()
 {
-    m_settings->set("uuid", QUuid::createUuid().toString(QUuid::Id128));
+    m_settings->set("uuid", QUuid::createUuid().toString(QUuid::WithoutBraces));
 }
 
 bool BaseInstance::isRunning() const

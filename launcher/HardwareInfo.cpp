@@ -107,25 +107,43 @@ uint64_t HardwareInfo::availableRamMiB()
 
 QStringList HardwareInfo::gpuInfo()
 {
-    ComPtr<IDXGIFactory6> factory;
-    HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory));
+    ComPtr<IDXGIFactory6> factory6;
+    HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory6));
     if (FAILED(hr)) {
-        qWarning() << "Could not create DXGI factory:" << Qt::hex << hr;
-        return { "GPU discovery failed: could not create DXGI factory" };
+        ComPtr<IDXGIFactory1> factory1;
+        hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory1));
+        if (FAILED(hr)) {
+            qWarning() << "Could not create DXGI factory:" << Qt::hex << hr;
+            return { "GPU discovery failed: could not create DXGI factory" };
+        }
+
+        UINT i = 0;
+        ComPtr<IDXGIAdapter> adapter;
+        QStringList out;
+        while (factory1->EnumAdapters(i, &adapter) != DXGI_ERROR_NOT_FOUND) {
+            DXGI_ADAPTER_DESC desc;
+            hr = adapter->GetDesc(&desc);
+            if (SUCCEEDED(hr)) {
+                out << "GPU: " + QString::fromWCharArray(desc.Description);
+            } else {
+                qWarning() << "Could not get DXGI adapter description:" << Qt::hex << hr;
+            }
+            ++i;
+        }
+        return out;
     }
 
     UINT i = 0;
     ComPtr<IDXGIAdapter> adapter;
     QStringList out;
-    while (factory->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)) != DXGI_ERROR_NOT_FOUND) {
+    while (factory6->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)) != DXGI_ERROR_NOT_FOUND) {
         DXGI_ADAPTER_DESC desc;
         hr = adapter->GetDesc(&desc);
         if (SUCCEEDED(hr)) {
-            out << "GPU: " + QString::fromWCharArray(desc.Description);  // NOLINT(*-pro-bounds-array-to-pointer-decay, *-no-array-decay)
+            out << "GPU: " + QString::fromWCharArray(desc.Description);
         } else {
             qWarning() << "Could not get DXGI adapter description:" << Qt::hex << hr;
         }
-
         ++i;
     }
 

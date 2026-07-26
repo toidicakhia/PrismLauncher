@@ -22,16 +22,16 @@
 #include <QRegularExpression>
 #include "MessageLevel.h"
 
-using namespace Qt::Literals::StringLiterals;
 
-void LogParser::appendLine(QAnyStringView data)
+
+void LogParser::appendLine(const QString& data)
 {
     if (!m_partialData.isEmpty()) {
         m_buffer = QString(m_partialData);
         m_buffer.append("\n");
         m_partialData.clear();
     }
-    m_buffer.append(data.toString());
+    m_buffer.append(data);
 }
 
 std::optional<LogParser::Error> LogParser::getError()
@@ -50,18 +50,18 @@ std::optional<LogParser::LogEntry> LogParser::parseAttributes()
     for (const auto& attr : attributes) {
         auto name = attr.name();
         auto value = attr.value();
-        if (name == "logger"_L1) {
+        if (name == QLatin1String("logger")) {
             entry.logger = value.trimmed().toString();
-        } else if (name == "timestamp"_L1) {
+        } else if (name == QLatin1String("timestamp")) {
             if (value.trimmed().isEmpty()) {
                 m_parser.raiseError("log4j:Event Missing required attribute: timestamp");
                 return {};
             }
             entry.timestamp = QDateTime::fromSecsSinceEpoch(value.trimmed().toLongLong());
-        } else if (name == "level"_L1) {
+        } else if (name == QLatin1String("level")) {
             entry.levelText = value.trimmed().toString();
             entry.level = MessageLevel::fromName(entry.levelText);
-        } else if (name == "thread"_L1) {
+        } else if (name == QLatin1String("thread")) {
             entry.thread = value.trimmed().toString();
         }
     }
@@ -116,7 +116,7 @@ std::optional<LogParser::ParsedItem> LogParser::parseNext()
     m_parser.setNamespaceProcessing(false);
     m_parser.addData(m_buffer);
     if (m_parser.readNextStartElement()) {
-        if (m_parser.qualifiedName().compare("log4j:Event"_L1, Qt::CaseInsensitive) == 0) {
+        if (m_parser.qualifiedName().compare(QStringLiteral("log4j:Event"), Qt::CaseInsensitive) == 0) {
             int depth = 1;
             bool eod = false;
             while (depth > 0 && !eod) {
@@ -212,7 +212,7 @@ std::optional<LogParser::ParsedItem> LogParser::parseLog4J()
     m_parser.addData(m_buffer);
 
     m_parser.readNextStartElement();
-    if (m_parser.qualifiedName().compare("log4j:Event"_L1, Qt::CaseInsensitive) == 0) {
+    if (m_parser.qualifiedName().compare(QStringLiteral("log4j:Event"), Qt::CaseInsensitive) == 0) {
         auto entry_ = parseAttributes();
         if (!entry_.has_value()) {
             setError();
@@ -227,7 +227,7 @@ std::optional<LogParser::ParsedItem> LogParser::parseLog4J()
 
         auto foundStart = [&]() -> parseOp {
             depth += 1;
-            if (m_parser.qualifiedName().compare("log4j:Message"_L1, Qt::CaseInsensitive) == 0) {
+            if (m_parser.qualifiedName().compare(QStringLiteral("log4j:Message"), Qt::CaseInsensitive) == 0) {
                 QString message;
                 bool messageComplete = false;
 
@@ -239,7 +239,7 @@ std::optional<LogParser::ParsedItem> LogParser::parseLog4J()
                             message.append(m_parser.text());
                         } break;
                         case QXmlStreamReader::TokenType::EndElement: {
-                            if (m_parser.qualifiedName().compare("log4j:Message"_L1, Qt::CaseInsensitive) == 0) {
+                            if (m_parser.qualifiedName().compare(QStringLiteral("log4j:Message"), Qt::CaseInsensitive) == 0) {
                                 messageComplete = true;
                             }
                         } break;
@@ -265,7 +265,7 @@ std::optional<LogParser::ParsedItem> LogParser::parseLog4J()
 
         auto foundEnd = [&]() -> parseOp {
             depth -= 1;
-            if (depth == 0 && m_parser.qualifiedName().compare("log4j:Event"_L1, Qt::CaseInsensitive) == 0) {
+            if (depth == 0 && m_parser.qualifiedName().compare(QStringLiteral("log4j:Event"), Qt::CaseInsensitive) == 0) {
                 if (foundMessage) {
                     auto consumed = m_parser.characterOffset();
                     if (consumed > 0 && consumed <= m_buffer.length()) {

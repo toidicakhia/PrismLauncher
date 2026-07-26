@@ -141,7 +141,7 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended)
     ui->versions->setStyleSheet("combobox-popup: 0;");
     ui->version->setStyleSheet("combobox-popup: 0;");
     connect(ui->showAllVersions, &QCheckBox::stateChanged, this, &ModFilterWidget::onShowAllVersionsChanged);
-    connect(ui->versions, &QComboBox::currentIndexChanged, this, &ModFilterWidget::onVersionFilterChanged);
+    connect(ui->versions, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModFilterWidget::onVersionFilterChanged);
     connect(ui->versions, &CheckComboBox::checkedItemsChanged, this, [this] { onVersionFilterChanged(0); });
     connect(ui->version, &QComboBox::currentTextChanged, this, &ModFilterWidget::onVersionFilterTextChanged);
 
@@ -234,7 +234,7 @@ void ModFilterWidget::prepareBasicFilter()
                 loaders |= ModPlatform::getModLoaderFromString(loader);
             }
         } else {
-            loaders = m_instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes(0));
+            loaders = m_instance->getPackProfile()->getSupportedModLoaders().value_or(ModPlatform::ModLoaderTypes{});
         }
         ui->neoForge->setChecked(loaders & ModPlatform::NeoForge);
         ui->forge->setChecked(loaders & ModPlatform::Forge);

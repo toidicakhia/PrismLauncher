@@ -362,7 +362,7 @@ void ModFolderPage::exportModMetadata()
         selectedMods = m_model->allMods();
     }
 
-    std::ranges::sort(selectedMods, [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
+    std::sort(selectedMods.begin(), selectedMods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
     ExportToModListDialog dlg(m_instance->name(), selectedMods, this);
     dlg.exec();
 }

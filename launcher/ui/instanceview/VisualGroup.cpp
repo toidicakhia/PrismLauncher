@@ -55,7 +55,9 @@ void VisualGroup::update()
     auto itemsPerRow = view->itemsPerRow();
 
     int numRows = qMax(1, qCeil((qreal)temp_items.size() / (qreal)itemsPerRow));
-    rows = QList<VisualRow>(numRows);
+    rows.clear();
+    for (int i = 0; i < numRows; ++i)
+        rows.append(VisualRow{});
 
     int maxRowHeight = 0;
     int positionInRow = 0;
@@ -74,7 +76,7 @@ void VisualGroup::update()
             maxRowHeight = 0;
         }
         QStyleOptionViewItem viewItemOption;
-        view->initViewItemOption(&viewItemOption);
+        viewItemOption.initFrom(view);
 
         auto itemHeight = view->itemDelegate()->sizeHint(viewItemOption, item).height();
         if (itemHeight > maxRowHeight) {

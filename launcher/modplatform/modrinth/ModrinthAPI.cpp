@@ -116,11 +116,11 @@ std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getProjects(QStringList addonIds)
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 {
     // https://docs.modrinth.com/api-spec/#tag/projects/operation/searchProjects
-    return { { .index = 1, .name = "relevance", .readable_name = QObject::tr("Sort by Relevance") },
-             { .index = 2, .name = "downloads", .readable_name = QObject::tr("Sort by Downloads") },
-             { .index = 3, .name = "follows", .readable_name = QObject::tr("Sort by Follows") },
-             { .index = 4, .name = "newest", .readable_name = QObject::tr("Sort by Newest") },
-             { .index = 5, .name = "updated", .readable_name = QObject::tr("Sort by Last Updated") } };
+    return { { 1, "relevance", QObject::tr("Sort by Relevance") },
+             { 2, "downloads", QObject::tr("Sort by Downloads") },
+             { 3, "follows", QObject::tr("Sort by Follows") },
+             { 4, "newest", QObject::tr("Sort by Newest") },
+             { 5, "updated", QObject::tr("Sort by Last Updated") } };
 }
 
 std::pair<Task::Ptr, QByteArray*> ModrinthAPI::getModCategories()
@@ -152,7 +152,7 @@ QList<ModPlatform::Category> ModrinthAPI::loadCategories(const QByteArray& respo
             auto cat = Json::requireObject(val);
             auto name = Json::requireString(cat, "name");
             if (cat["project_type"].toString() == projectType) {
-                categories.push_back({ .name = name, .id = name });
+                categories.push_back({ name, name });
             }
         }
 

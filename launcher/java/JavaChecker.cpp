@@ -83,7 +83,7 @@ void JavaChecker::executeTask()
     m_process->setProcessEnvironment(CleanEnviroment());
     qDebug() << "Running java checker:" << m_path << args.join(" ");
 
-    connect(m_process.get(), &QProcess::finished, this, &JavaChecker::finished);
+    connect(m_process.get(), static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this, &JavaChecker::finished);
     connect(m_process.get(), &QProcess::errorOccurred, this, &JavaChecker::error);
     connect(m_process.get(), &QProcess::readyReadStandardOutput, this, &JavaChecker::stdoutReady);
     connect(m_process.get(), &QProcess::readyReadStandardError, this, &JavaChecker::stderrReady);
@@ -184,10 +184,7 @@ void JavaChecker::error(QProcess::ProcessError err)
         qDebug() << QProcessEnvironment::systemEnvironment().toStringList();
         m_killTimer.stop();
 
-        Result result = {
-            .path = m_path,
-            .id = m_id,
-        };
+        Result result = { m_path, m_id };
         result.errorLog = m_process->errorString();
         result.validity = Result::Validity::Errored;
         emit checkFinished(result);

@@ -17,7 +17,6 @@
  *
  */
 #pragma once
-#include <QAnyStringView>
 #include <QDateTime>
 #include <QList>
 #include <QString>
@@ -53,7 +52,7 @@ class LogParser {
    public:
     LogParser() = default;
 
-    void appendLine(QAnyStringView data);
+    void appendLine(const QString& data);
     std::optional<ParsedItem> parseNext();
     QList<ParsedItem> parseAvailable();
     std::optional<Error> getError();

@@ -380,7 +380,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
                     return;
                 }
 
-                auto fingerprint = QString::number(file_obj["fileFingerprint"].toInteger());
+                auto fingerprint = QString::number(file_obj["fileFingerprint"].toVariant().toLongLong());
                 auto resource = m_resources.find(fingerprint);
                 if (resource == m_resources.end()) {
                     qWarning() << "Invalid fingerprint from the API response.";

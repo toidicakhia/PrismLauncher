@@ -97,11 +97,11 @@ auto intEntry(toml::table table, const QString& entryName) -> int
 
 bool sortMCVersions(const QString& a, const QString& b)
 {
-    auto cmp = Version(a) <=> Version(b);
-    if (cmp == std::strong_ordering::equal) {
+    auto cmp = Version(a).compare(Version(b));
+    if (cmp == 0) {
         return a < b;
     }
-    return cmp == std::strong_ordering::less;
+    return cmp < 0;
 }
 
 }  // namespace
@@ -132,7 +132,7 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
     mod.loaders = mod_version.loaders;
     mod.mcVersions = mod_version.mcVersion;
     mod.mcVersions.removeDuplicates();
-    std::ranges::sort(mod.mcVersions, sortMCVersions);
+    std::sort(mod.mcVersions.begin(), mod.mcVersions.end(), sortMCVersions);
     mod.releaseType = mod_version.version_type;
 
     mod.version_number = mod_version.version_number;
@@ -318,7 +318,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
                 }
             }
             mod.mcVersions.removeDuplicates();
-            std::ranges::sort(mod.mcVersions, sortMCVersions);
+    std::sort(mod.mcVersions.begin(), mod.mcVersions.end(), sortMCVersions);
         }
     }
     mod.version_number = table["x-prismlauncher-version-number"].value_or("");

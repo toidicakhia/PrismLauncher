@@ -146,7 +146,8 @@ bool LockedFile::lock(LockMode mode, bool block)
                 rmutexes.append(mutex);
         }
         if (rmutexes.size()) {
-            DWORD res = WaitForMultipleObjects(rmutexes.size(), rmutexes.constData(), TRUE, block ? INFINITE : 0);
+            QVector<HANDLE> mutexVec(rmutexes.begin(), rmutexes.end());
+            DWORD res = WaitForMultipleObjects(mutexVec.size(), mutexVec.constData(), TRUE, block ? INFINITE : 0);
             if (res != WAIT_OBJECT_0 && res != WAIT_ABANDONED) {
                 if (res != WAIT_TIMEOUT)
                     qErrnoWarning("QtLockedFile::lock(): WaitForMultipleObjects failed");

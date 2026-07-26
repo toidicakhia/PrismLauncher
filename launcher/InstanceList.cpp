@@ -1012,7 +1012,7 @@ QString InstanceList::getStagedInstancePath()
         if (++tries > 256)
             return {};
 
-        const QString key = QUuid::createUuid().toString(QUuid::Id128).left(6);
+        const QString key = QUuid::createUuid().toString(QUuid::WithoutBraces).left(6);
         result = FS::PathCombine(tempRoot, key);
     } while (QFileInfo::exists(result));
 

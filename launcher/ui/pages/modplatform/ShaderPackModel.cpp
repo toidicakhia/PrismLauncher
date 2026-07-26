@@ -21,29 +21,29 @@ ShaderPackResourceModel::ShaderPackResourceModel(const BaseInstance& base_inst,
 ResourceAPI::SearchArgs ShaderPackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return {
-        .type = ModPlatform::ResourceType::ShaderPack,
-        .offset = m_next_search_offset,
-        .search = m_search_term,
-        .sorting = sort,
-        .loaders = {},
-        .versions = {},
-        .side = {},
-        .categoryIds = {},
-        .openSource = {},
-    };
+    ResourceAPI::SearchArgs args{};
+    args.type = ModPlatform::ResourceType::ShaderPack;
+    args.offset = m_next_search_offset;
+    args.search = m_search_term;
+    args.sorting = sort;
+    return args;
 }
 
 ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { .pack = pack, .mcVersions = {}, .loaders = {}, .resourceType = ModPlatform::ResourceType::ShaderPack };
+    ResourceAPI::VersionSearchArgs args{};
+    args.pack = pack;
+    args.resourceType = ModPlatform::ResourceType::ShaderPack;
+    return args;
 }
 
 ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
     auto pack = m_packs[entry.row()];
-    return { .pack = pack };
+    ResourceAPI::ProjectInfoArgs args{};
+    args.pack = pack;
+    return args;
 }
 
 void ShaderPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

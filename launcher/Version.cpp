@@ -22,7 +22,7 @@
 #include <QDebug>
 #include <QRegularExpressionMatch>
 #include <QUrl>
-#include <compare>
+
 
 /// qDebug print support for the Version class
 QDebug operator<<(QDebug debug, const Version& v)
@@ -45,56 +45,42 @@ QDebug operator<<(QDebug debug, const Version& v)
     return debug;
 }
 
-std::strong_ordering Version::Section::operator<=>(const Section& other) const
+int Version::Section::compare(const Section& other) const
 {
-    // If both components are numeric, compare numerically (codepoint-wise)
     if (this->t == Type::Numeric && other.t == Type::Numeric) {
         auto aLen = this->value.size();
         if (aLen != other.value.size()) {
-            // Lengths differ; compare by length
-            return aLen <=> other.value.size();
+            return aLen < other.value.size() ? -1 : 1;
         }
-        // Compare by digits
         auto cmp = QString::compare(this->value, other.value);
-        if (cmp < 0) {
-            return std::strong_ordering::less;
-        }
-        if (cmp > 0) {
-            return std::strong_ordering::greater;
-        }
-        return std::strong_ordering::equal;
+        if (cmp < 0) return -1;
+        if (cmp > 0) return 1;
+        return 0;
     }
-    // One or both are null
     if (this->t == Type::Null) {
-        if (other.t == Type::PreRelease) {
-            return std::strong_ordering::greater;
-        }
-        return std::strong_ordering::less;
+        if (other.t == Type::PreRelease) return 1;
+        return -1;
     }
     if (other.t == Type::Null) {
-        if (this->t == Type::PreRelease) {
-            return std::strong_ordering::less;
-        }
-        return std::strong_ordering::greater;
+        if (this->t == Type::PreRelease) return -1;
+        return 1;
     }
-    // Textual comparison (differing type, or both textual/pre-release)
     auto minLen = qMin(this->value.size(), other.value.size());
     for (int i = 0; i < minLen; i++) {
         auto a = this->value.at(i);
         auto b = other.value.at(i);
         if (a != b) {
-            // Compare by rune
-            return a.unicode() <=> b.unicode();
+            return a.unicode() < b.unicode() ? -1 : 1;
         }
     }
-    // Compare by length
-    return this->value.size() <=> other.value.size();
+    auto szCmp = this->value.size() - other.value.size();
+    return szCmp < 0 ? -1 : (szCmp > 0 ? 1 : 0);
 }
 
 namespace {
 void removeLeadingZeros(QString& s)
 {
-    s.remove(0, std::distance(s.begin(), std::ranges::find_if_not(s, [](QChar c) { return c == '0'; })));
+    s.remove(0, std::distance(s.begin(), std::find_if_not(s.begin(), s.end(), [](QChar c) { return c == '0'; })));
 }
 }  // namespace
 
@@ -142,16 +128,16 @@ void Version::parse()
     }
 }
 
-std::strong_ordering Version::operator<=>(const Version& other) const
+int Version::compare(const Version& other) const
 {
     const auto size = qMax(m_sections.size(), other.m_sections.size());
     for (int i = 0; i < size; ++i) {
         auto sec1 = (i >= m_sections.size()) ? Section() : m_sections.at(i);
         auto sec2 = (i >= other.m_sections.size()) ? Section() : other.m_sections.at(i);
 
-        if (auto cmp = sec1 <=> sec2; cmp != std::strong_ordering::equal) {
+        if (auto cmp = sec1.compare(sec2); cmp != 0) {
             return cmp;
         }
     }
-    return std::strong_ordering::equal;
+    return 0;
 }

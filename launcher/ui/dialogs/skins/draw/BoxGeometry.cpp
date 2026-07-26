@@ -76,7 +76,7 @@ static const QList<QVector4D> vertices = {
 // index of the second strip needs to be duplicated. If
 // connecting strips have same vertex order then only last
 // index of the first strip needs to be duplicated.
-static const QList<GLushort> indices = {
+static const QVector<GLushort> indices = {
     0,  1,  2,  3,  3,       // Face 0 - triangle strip ( v0,  v1,  v2,  v3)
     4,  4,  5,  6,  7,  7,   // Face 1 - triangle strip ( v4,  v5,  v6,  v7)
     8,  8,  9,  10, 11, 11,  // Face 2 - triangle strip ( v8,  v9, v10, v11)
@@ -85,13 +85,13 @@ static const QList<GLushort> indices = {
     20, 20, 21, 22, 23       // Face 5 - triangle strip (v20, v21, v22, v23)
 };
 
-static const QList<VertexData> planeVertices = {
+static const QVector<VertexData> planeVertices = {
     { QVector4D(-1.0f, -1.0f, -0.5f, 1.0f), QVector2D(0.0f, 0.0f) },  // Bottom-left
     { QVector4D(1.0f, -1.0f, -0.5f, 1.0f), QVector2D(1.0f, 0.0f) },   // Bottom-right
     { QVector4D(-1.0f, 1.0f, -0.5f, 1.0f), QVector2D(0.0f, 1.0f) },   // Top-left
     { QVector4D(1.0f, 1.0f, -0.5f, 1.0f), QVector2D(1.0f, 1.0f) },    // Top-right
 };
-static const QList<GLushort> planeIndices = {
+static const QVector<GLushort> planeIndices = {
     0, 1, 2, 3, 3  // Face 0 - triangle strip ( v0,  v1,  v2,  v3)
 };
 
@@ -238,7 +238,7 @@ void BoxGeometry::initGeometry(float u, float v, float width, float height, floa
     transformation.scale(m_size);
     auto positions = transformVectors(transformation, vertices);
 
-    QList<VertexData> verticesData;
+    QVector<VertexData> verticesData;
     verticesData.reserve(positions.size());  // Reserve space for efficiency
 
     for (int i = 0; i < positions.size(); ++i) {
@@ -247,11 +247,11 @@ void BoxGeometry::initGeometry(float u, float v, float width, float height, floa
 
     // Transfer vertex data to VBO 0
     m_vertexBuf.bind();
-    m_vertexBuf.allocate(verticesData.constData(), static_cast<int>(verticesData.size() * sizeof(VertexData)));
+    m_vertexBuf.allocate(verticesData.data(), static_cast<int>(verticesData.size() * sizeof(VertexData)));
 
     // Transfer index data to VBO 1
     m_indexBuf.bind();
-    m_indexBuf.allocate(indices.constData(), static_cast<int>(indices.size() * sizeof(GLushort)));
+    m_indexBuf.allocate(indices.data(), static_cast<int>(indices.size() * sizeof(GLushort)));
     m_indecesCount = indices.size();
 }
 
@@ -266,11 +266,11 @@ BoxGeometry* BoxGeometry::Plane()
 
     // Transfer vertex data to VBO 0
     b->m_vertexBuf.bind();
-    b->m_vertexBuf.allocate(planeVertices.constData(), static_cast<int>(planeVertices.size() * sizeof(VertexData)));
+    b->m_vertexBuf.allocate(planeVertices.data(), static_cast<int>(planeVertices.size() * sizeof(VertexData)));
 
     // Transfer index data to VBO 1
     b->m_indexBuf.bind();
-    b->m_indexBuf.allocate(planeIndices.constData(), static_cast<int>(planeIndices.size() * sizeof(GLushort)));
+    b->m_indexBuf.allocate(planeIndices.data(), static_cast<int>(planeIndices.size() * sizeof(GLushort)));
     b->m_indecesCount = planeIndices.size();
 
     return b;

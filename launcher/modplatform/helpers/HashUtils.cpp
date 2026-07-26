@@ -87,19 +87,19 @@ QString hash(QIODevice* device, Algorithm type)
     QCryptographicHash::Algorithm alg = QCryptographicHash::Sha1;
     switch (type) {
         case Algorithm::Md4:
-            alg = QCryptographicHash::Algorithm::Md4;
+            alg = QCryptographicHash::Md4;
             break;
         case Algorithm::Md5:
-            alg = QCryptographicHash::Algorithm::Md5;
+            alg = QCryptographicHash::Md5;
             break;
         case Algorithm::Sha1:
-            alg = QCryptographicHash::Algorithm::Sha1;
+            alg = QCryptographicHash::Sha1;
             break;
         case Algorithm::Sha256:
-            alg = QCryptographicHash::Algorithm::Sha256;
+            alg = QCryptographicHash::Sha256;
             break;
         case Algorithm::Sha512:
-            alg = QCryptographicHash::Algorithm::Sha512;
+            alg = QCryptographicHash::Sha512;
             break;
         case Algorithm::Murmur2: {  // CF-specific
             auto should_filter_out = [](char c) { return (c == 9 || c == 10 || c == 13 || c == 32); };

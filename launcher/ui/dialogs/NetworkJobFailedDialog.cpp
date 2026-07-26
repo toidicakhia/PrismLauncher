@@ -77,7 +77,7 @@ void NetworkJobFailedDialog::copyUrl() const
     }
 
     QString urls = items.first()->text(0);
-    for (auto& item : items.sliced(1)) {
+    for (auto& item : items.mid(1)) {
         urls += "\n" + item->text(0);
     }
 

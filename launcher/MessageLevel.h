@@ -35,8 +35,19 @@ struct MessageLevel : EnumWrapper<MessageLevel, MessageLevelValue> {
             std::pair{ Error, "CRITICAL" },  std::pair{ Fatal, "FATAL" },
         };
     };
-    using enum MessageLevelValue;
     using Base = EnumWrapper<MessageLevel, MessageLevelValue>;
+
+    static constexpr auto Unknown = MessageLevelValue::Unknown;
+    static constexpr auto StdOut = MessageLevelValue::StdOut;
+    static constexpr auto StdErr = MessageLevelValue::StdErr;
+    static constexpr auto Launcher = MessageLevelValue::Launcher;
+    static constexpr auto Trace = MessageLevelValue::Trace;
+    static constexpr auto Debug = MessageLevelValue::Debug;
+    static constexpr auto Info = MessageLevelValue::Info;
+    static constexpr auto Message = MessageLevelValue::Message;
+    static constexpr auto Warning = MessageLevelValue::Warning;
+    static constexpr auto Error = MessageLevelValue::Error;
+    static constexpr auto Fatal = MessageLevelValue::Fatal;
     using Base::Base; /* inherit ctor */
 
     static MessageLevel fromName(const QString& type) { return fromString(type.toUpper()); };
@@ -49,3 +60,5 @@ struct MessageLevel : EnumWrapper<MessageLevel, MessageLevelValue> {
     /* Get message level from a line from the launcher log. Line is modified if it was successful. */
     static MessageLevel takeFromLauncherLine(QString& line);
 };
+
+Q_DECLARE_METATYPE(MessageLevel)

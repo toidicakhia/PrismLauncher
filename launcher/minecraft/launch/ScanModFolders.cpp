@@ -45,19 +45,31 @@ void ScanModFolders::executeTask()
     auto m_inst = m_parent->instance();
 
     auto loaders = m_inst->loaderModList();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     connect(loaders, &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone, Qt::SingleShotConnection);
+#else
+    connect(loaders, &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
+#endif
     if (!loaders->update()) {
         m_modsDone = true;
     }
 
     auto cores = m_inst->coreModList();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     connect(cores, &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone, Qt::SingleShotConnection);
+#else
+    connect(cores, &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
+#endif
     if (!cores->update()) {
         m_coreModsDone = true;
     }
 
     auto nils = m_inst->nilModList();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     connect(nils, &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone, Qt::SingleShotConnection);
+#else
+    connect(nils, &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
+#endif
     if (!nils->update()) {
         m_nilModsDone = true;
     }

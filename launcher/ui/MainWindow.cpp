@@ -540,9 +540,9 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions = ui->fileMenu->actions();
 
         // remove the add instance action, launcher settings action and close action
-        actions.removeFirst();
-        actions.removeLast();
-        actions.removeLast();
+        actions.removeAt(0);
+        actions.removeAt(actions.size() - 1);
+        actions.removeAt(actions.size() - 1);
 
         actions.prepend(ui->actionChangeInstIcon);
         actions.prepend(ui->actionRenameInstance);
@@ -736,7 +736,7 @@ void MainWindow::changeActiveAccount()
     QAction* sAction = (QAction*)sender();
 
     // Profile's associated Mojang username
-    if (sAction->data().typeId() != QMetaType::Int)
+    if (sAction->data().userType() != QMetaType::Int)
         return;
 
     QVariant action_data = sAction->data();

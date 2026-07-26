@@ -88,9 +88,9 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
     m_ui->sortByBox->addItem(tr("Sort by Newest"));
     m_ui->sortByBox->addItem(tr("Sort by Last Updated"));
 
-    connect(m_ui->sortByBox, &QComboBox::currentIndexChanged, this, &ModrinthPage::triggerSearch);
+    connect(m_ui->sortByBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModrinthPage::triggerSearch);
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this, &ModrinthPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModrinthPage::onVersionSelectionChanged);
 
     m_ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -187,7 +187,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
                 return;  // wrong request
             }
 
-            m_current->versions = doc;
+            m_current->versions = {doc.cbegin(), doc.cend()};
             m_current->versionsLoaded = true;
             auto pred = [this](const ModPlatform::IndexedVersion& v) {
                 if (auto filter = m_filterWidget->getFilter())

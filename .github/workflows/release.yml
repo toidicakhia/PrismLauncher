@@ -121,6 +121,9 @@ jobs:
             PrismLauncher-Windows-MSVC-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Setup-${{ env.VERSION }}.exe
+            PrismLauncher-Windows-MSVC-Legacy-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MSVC-Legacy-Portable-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MSVC-Legacy-Setup-${{ env.VERSION }}.exe
             PrismLauncher-macOS-${{ env.VERSION }}.zip
             PrismLauncher-macOS-${{ env.VERSION }}.dmg
             PrismLauncher-${{ env.VERSION }}.tar.gz

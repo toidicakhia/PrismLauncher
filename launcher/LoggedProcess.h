@@ -36,8 +36,13 @@
 #pragma once
 
 #include <QProcess>
-#include <QStringDecoder>
 #include "MessageLevel.h"
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringDecoder>
+#else
+#include <QTextCodec>
+#endif
 
 /*
  * This is a basic process.
@@ -49,7 +54,11 @@ class LoggedProcess : public QProcess {
     enum State { NotRunning, Starting, FailedToStart, Running, Finished, Crashed, Aborted };
 
    public:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     explicit LoggedProcess(QStringConverter::Encoding outputEncoding = QStringConverter::System, QObject* parent = nullptr);
+#else
+    explicit LoggedProcess(QTextCodec* outputEncoding = QTextCodec::codecForLocale(), QObject* parent = nullptr);
+#endif
     virtual ~LoggedProcess();
 
     State state() const;
@@ -77,11 +86,20 @@ class LoggedProcess : public QProcess {
    private:
     void changeState(LoggedProcess::State state);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QStringList reprocess(const QByteArray& data, QStringDecoder& decoder);
+#else
+    QStringList reprocess(const QByteArray& data, QTextDecoder* decoder);
+#endif
 
    private:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QStringDecoder m_err_decoder;
     QStringDecoder m_out_decoder;
+#else
+    QTextDecoder* m_err_decoder;
+    QTextDecoder* m_out_decoder;
+#endif
     QString m_leftover_line;
     bool m_killed = false;
     State m_state = NotRunning;

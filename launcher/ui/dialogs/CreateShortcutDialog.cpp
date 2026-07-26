@@ -198,10 +198,10 @@ void CreateShortcutDialog::createShortcut()
     if (ui->targetCheckbox->isChecked()) {
         if (ui->worldTarget->isChecked()) {
             targetString = tr("world");
-            extraArgs = { "--world", ui->worldSelectionBox->currentData().toString() };
+            extraArgs = QStringList{ "--world", ui->worldSelectionBox->currentData().toString() };
         } else if (ui->serverTarget->isChecked()) {
             targetString = tr("server");
-            extraArgs = { "--server", ui->serverAddressBox->text() };
+            extraArgs = QStringList{ "--server", ui->serverAddressBox->text() };
         }
     }
 

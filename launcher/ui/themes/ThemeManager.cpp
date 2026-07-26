@@ -189,7 +189,7 @@ void ThemeManager::stopSettingNewWindowColorsOnMac() {}
 QList<IconTheme*> ThemeManager::getValidIconThemes()
 {
     QList<IconTheme*> ret;
-    ret.reserve(m_icons.size());
+    ret.reserve(static_cast<int>(m_icons.size()));
     for (auto&& [id, theme] : m_icons) {
         ret.append(&theme);
     }
@@ -199,7 +199,7 @@ QList<IconTheme*> ThemeManager::getValidIconThemes()
 QList<ITheme*> ThemeManager::getValidApplicationThemes()
 {
     QList<ITheme*> ret;
-    ret.reserve(m_themes.size());
+    ret.reserve(static_cast<int>(m_themes.size()));
     for (auto&& [id, theme] : m_themes) {
         ret.append(theme.get());
     }
@@ -209,7 +209,7 @@ QList<ITheme*> ThemeManager::getValidApplicationThemes()
 QList<CatPack*> ThemeManager::getValidCatPacks()
 {
     QList<CatPack*> ret;
-    ret.reserve(m_catPacks.size());
+    ret.reserve(static_cast<int>(m_catPacks.size()));
     for (auto&& [id, theme] : m_catPacks) {
         ret.append(theme.get());
     }

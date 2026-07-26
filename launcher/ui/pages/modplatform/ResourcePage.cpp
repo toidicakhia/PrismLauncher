@@ -179,7 +179,7 @@ void ResourcePage::addSortings()
     Q_ASSERT(m_model);
 
     auto sorts = m_model->getSortingMethods();
-    std::ranges::sort(sorts, [](const auto& l, const auto& r) { return l.index < r.index; });
+    std::sort(sorts.begin(), sorts.end(), [](const auto& l, const auto& r) { return l.index < r.index; });
 
     for (auto&& sorting : sorts) {
         m_ui->sortByBox->addItem(sorting.readable_name, QVariant(sorting.index));
@@ -588,7 +588,7 @@ void ResourcePage::openProject(const QVariant& projectID)
     connect(cancelBtn, &QPushButton::clicked, m_parentDialog, &ResourceDownloadDialog::reject);
     m_ui->gridLayout_4->addWidget(buttonBox, 1, 2);
 
-    connect(m_ui->versionSelectionBox, &QComboBox::currentIndexChanged, this,
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             [this, okBtn](int index) { okBtn->setEnabled(m_ui->versionSelectionBox->itemData(index).toInt() >= 0); });
 
     auto jump = [this] {

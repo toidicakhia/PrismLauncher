@@ -180,10 +180,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(const QString& path, 
 {
     auto install = [this, path] { installResource(path); };
     if (vers.addonId.isValid()) {
-        ModPlatform::IndexedPack pack{
-            .addonId = vers.addonId,
-            .provider = ModPlatform::ResourceProvider::FLAME,
-        };
+        ModPlatform::IndexedPack pack{ vers.addonId, ModPlatform::ResourceProvider::FLAME };
 
         auto [job, response] = FlameAPI().getProject(vers.addonId.toString());
         connect(job.get(), &Task::failed, this, install);
@@ -787,7 +784,7 @@ QSortFilterProxyModel* ResourceFolderModel::createFilterProxyModel(QObject* pare
 SortType ResourceFolderModel::columnToSortKey(size_t column) const
 {
     Q_ASSERT(m_columnSortKeys.size() == columnCount());
-    return m_columnSortKeys.at(column);
+    return m_columnSortKeys.at(static_cast<int>(column));
 }
 
 /* Standard Proxy Model for createFilterProxyModel */
@@ -908,7 +905,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& currentSet, QSet<QString>&
             removedRows.append(m_resourcesIndex[removed]);
         }
 
-        std::ranges::sort(removedRows, std::greater());
+        std::sort(removedRows.begin(), removedRows.end(), std::greater());
 
         for (auto& removedIndex : removedRows) {
             auto removedIt = m_resources.begin() + removedIndex;

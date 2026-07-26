@@ -744,7 +744,7 @@ void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
         qCWarning(instanceProfileResolveC) << "Got task index outside of results" << taskIndex;
         return;
     }
-    auto& taskSlot = d->remoteLoadStatusList[taskIndex];
+    auto& taskSlot = d->remoteLoadStatusList[static_cast<int>(taskIndex)];
     disconnect(taskSlot.task.get(), &Task::succeeded, this, nullptr);
     disconnect(taskSlot.task.get(), &Task::failed, this, nullptr);
     disconnect(taskSlot.task.get(), &Task::aborted, this, nullptr);
@@ -771,7 +771,7 @@ void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg)
         qCWarning(instanceProfileResolveC) << "Got task index outside of results" << taskIndex;
         return;
     }
-    auto& taskSlot = d->remoteLoadStatusList[taskIndex];
+    auto& taskSlot = d->remoteLoadStatusList[static_cast<int>(taskIndex)];
     disconnect(taskSlot.task.get(), &Task::succeeded, this, nullptr);
     disconnect(taskSlot.task.get(), &Task::failed, this, nullptr);
     disconnect(taskSlot.task.get(), &Task::aborted, this, nullptr);

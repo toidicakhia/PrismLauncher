@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25) # Required for features like `CMAKE_MSVC_DEBUG_INFORMATION_FORMAT`
+cmake_minimum_required(VERSION 3.20)
 
 project(Launcher LANGUAGES C CXX)
 if(APPLE)
@@ -31,13 +31,19 @@ set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 ######## Set compiler flags ########
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_C_STANDARD_REQUIRED true)
-set(CMAKE_CXX_STANDARD 20)
+if(Launcher_QT_VERSION_MAJOR EQUAL 6)
+    set(CMAKE_CXX_STANDARD 20)
+else()
+    set(CMAKE_CXX_STANDARD 17)
+endif()
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 
 add_compile_definitions($<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>)
-add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060400)
-add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060400)
+if(Launcher_QT_VERSION_MAJOR EQUAL 6)
+    add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060400)
+    add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060400)
+endif()
 
 if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     add_compile_options(
@@ -65,7 +71,11 @@ if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
 
     # See https://github.com/ccache/ccache/issues/1040
     # TODO(@getchoo): Is sccache affected by this? Would be nice to use `ProgramDatabase`....
-    set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
+        set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
+    else()
+        add_compile_options("$<$<CONFIG:Debug,RelWithDebInfo>:/Z7>")
+    endif()
 
     if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL")
         set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
@@ -295,14 +305,29 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 6)
     find_package(Qt6 6.4 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml NetworkAuth OpenGL)
     find_package(Qt6 COMPONENTS DBus)
     list(APPEND Launcher_QT_DBUS Qt6::DBus)
+elseif(Launcher_QT_VERSION_MAJOR EQUAL 5)
+    set(QT_VERSION_MAJOR 5)
+    find_package(Qt5 5.15 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml NetworkAuth OpenGL)
+    find_package(Qt5 COMPONENTS DBus)
+    list(APPEND Launcher_QT_DBUS Qt5::DBus)
+
+    set(Launcher_QT_VERSION_MAJOR 5 CACHE STRING "Major Qt version to build against" FORCE)
 else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-if(Launcher_QT_VERSION_MAJOR EQUAL 6)
+if(QT_VERSION_MAJOR EQUAL 6)
     set(QT_PLUGINS_DIR  ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_PLUGINS})
     set(QT_LIBS_DIR     ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBS})
     set(QT_LIBEXECS_DIR ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBEXECS})
+endif()
+
+# Set Windows target version for Windows 7 support
+if(WIN32 AND Launcher_QT_VERSION_MAJOR EQUAL 5)
+    add_compile_definitions(_WIN32_WINNT=0x0601 WINVER=0x0601 NTDDI_VERSION=0x06010000)
+    if(MSVC)
+        add_compile_definitions(_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
+    endif()
 endif()
 
 find_package(cmark REQUIRED)

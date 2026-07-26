@@ -38,6 +38,7 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QStringList>
+#include <optional>
 
 struct GradleSpecifier {
     GradleSpecifier() { m_valid = false; }
@@ -125,7 +126,12 @@ struct GradleSpecifier {
     {
         return other.artifactId() == artifactId() && other.groupId() == groupId() && other.classifier() == classifier();
     }
-    bool operator ==(const GradleSpecifier &other) const = default;
+    bool operator ==(const GradleSpecifier &other) const
+    {
+        return m_groupId == other.m_groupId && m_artifactId == other.m_artifactId && m_version == other.m_version &&
+               m_classifier == other.m_classifier && m_extension == other.m_extension && m_valid == other.m_valid;
+    }
+    bool operator !=(const GradleSpecifier &other) const { return !(*this == other); }
 
    private:
     QString m_invalidValue;

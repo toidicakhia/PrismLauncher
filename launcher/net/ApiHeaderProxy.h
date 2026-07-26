@@ -69,16 +69,16 @@ class ApiHeaderProxy : public HeaderProxy {
 
         if (APPLICATION->capabilities() & Application::SupportsFlame &&
             (host == QUrl(BuildConfig.FLAME_BASE_URL).host() || host == BuildConfig.FLAME_DOWNLOAD_HOST)) {
-            hdrs.append({ .headerName = "x-api-key", .headerValue = APPLICATION->getFlameAPIKey().toUtf8() });
+            hdrs.append({ QByteArray("x-api-key"), APPLICATION->getFlameAPIKey().toUtf8() });
         } else if (host == QUrl(BuildConfig.MODRINTH_PROD_URL).host() || host == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
             QString token = APPLICATION->getModrinthAPIToken();
             if (!token.isNull()) {
-                hdrs.append({ .headerName = "Authorization", .headerValue = token.toUtf8() });
+                hdrs.append({ QByteArray("Authorization"), token.toUtf8() });
             }
         }
 
         if (host == BuildConfig.MODRINTH_DOWNLOAD_HOST && !m_meta.isEmpty()) {
-            hdrs.append({ .headerName = "modrinth-download-meta", .headerValue = m_meta.toJson() });
+            hdrs.append({ QByteArray("modrinth-download-meta"), m_meta.toJson() });
         }
         return hdrs;
     };
